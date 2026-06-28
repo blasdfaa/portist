@@ -1,0 +1,87 @@
+<div class="detail">
+  <header class="head">
+    <button type="button" class="back" (click)="back.emit()" title="Назад">
+      ‹
+    </button>
+    <span class="dot" [class.dot--udp]="port().protocol === 'udp'"></span>
+    <button
+      type="button"
+      class="title"
+      (click)="copy('port', String(port().port))"
+      [class.copied]="copiedId() === 'port'"
+      title="Скопировать порт"
+    >
+      :{{ port().port }}
+    </button>
+    <span class="subtitle">
+      @if (port().processName) {
+        {{ port().processName }}
+      } @else {
+        <span class="dash">процесс неизвестен</span>
+      }
+    </span>
+    <span class="head-actions">
+      @if (canOpen()) {
+        <button
+          type="button"
+          class="act act--open"
+          (click)="open.emit()"
+          [title]="'Открыть localhost:' + port().port"
+        >
+          ↗
+        </button>
+      }
+      @if (port().isCurrentUser && port().pid !== null) {
+        <button
+          type="button"
+          class="act act--kill"
+          (click)="kill.emit()"
+          title="Завершить процесс"
+        >
+          ✕
+        </button>
+      }
+    </span>
+  </header>
+
+  <div class="content">
+    @if (error()) {
+      <div class="note note--error">{{ error() }}</div>
+    } @else if (loading()) {
+      <div class="note">Загрузка деталей…</div>
+    }
+
+    <dl class="fields">
+      @for (item of visibleFields(); track item.id) {
+        <div class="field" [class.field--wide]="item.wide">
+          <dt>{{ item.label }}</dt>
+          <dd>
+            <button
+              type="button"
+              class="val"
+              [class.copied]="copiedId() === item.id"
+              (click)="copy(item.id, item.copyValue)"
+              [attr.aria-label]="'Скопировать: ' + item.label"
+            >
+              <span class="val-text">{{ item.value }}</span>
+              <span class="val-hint">{{
+                copiedId() === item.id ? "скопировано" : "копировать"
+              }}</span>
+            </button>
+          </dd>
+        </div>
+      }
+    </dl>
+
+    @if (
+      !loading() &&
+      !error() &&
+      port().pid === null &&
+      visibleFields().length <= 5
+    ) {
+      <div class="note note--muted">
+        Детали процесса недоступны — нужен запуск с повышенными правами.
+      </div>
+    }
+  </div>
+</div>

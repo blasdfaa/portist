@@ -1,0 +1,54 @@
+<div
+  class="row"
+  [class.row--udp]="port().protocol === 'udp'"
+  role="button"
+  tabindex="0"
+  [attr.aria-label]="'Детали порта ' + port().port"
+  (click)="select.emit()"
+  (keydown.enter)="select.emit()"
+  (keydown.space)="$event.preventDefault(); select.emit()"
+>
+  <span class="dot" [attr.aria-hidden]="true"></span>
+
+  <span class="port">:{{ port().port }}</span>
+
+  <span class="proc" [title]="port().processName ?? ''">
+    @if (port().processName) {
+      {{ port().processName }}
+    } @else {
+      <span class="proc--none">—</span>
+    }
+  </span>
+
+  <span class="meta">
+    @if (port().pid !== null) {
+      <span class="pid">#{{ port().pid }}</span>
+    }
+    <span class="proto">{{ port().protocol }}</span>
+  </span>
+
+  <span class="actions">
+    @if (canOpen()) {
+      <button
+        type="button"
+        class="act act--open"
+        (click)="$event.stopPropagation(); open.emit()"
+        [title]="'Открыть localhost:' + port().port"
+      >
+        ↗
+      </button>
+    }
+    @if (port().isCurrentUser && port().pid !== null) {
+      <button
+        type="button"
+        class="act act--kill"
+        (click)="$event.stopPropagation(); kill.emit()"
+        title="Завершить процесс"
+      >
+        ✕
+      </button>
+    }
+  </span>
+
+  <span class="chev" [attr.aria-hidden]="true">›</span>
+</div>

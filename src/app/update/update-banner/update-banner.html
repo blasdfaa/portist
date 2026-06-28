@@ -1,0 +1,38 @@
+@if (updater.state(); as state) {
+  @switch (state.kind) {
+    @case ("checking") {
+      <div class="upd upd--info">
+        <span class="upd-spin">⟳</span>
+        <span class="upd-text">Проверяю обновления…</span>
+      </div>
+    }
+    @case ("uptodate") {
+      <div class="upd upd--info">
+        <span class="upd-text">Установлена последняя версия</span>
+        <button type="button" class="upd-x" (click)="updater.dismiss()" title="Скрыть">✕</button>
+      </div>
+    }
+    @case ("available") {
+      <div class="upd upd--accent">
+        <span class="upd-text">
+          Доступна версия <b>{{ state.version }}</b>
+        </span>
+        <button type="button" class="upd-cta" (click)="updater.install()">Обновить</button>
+        <button type="button" class="upd-x" (click)="updater.dismiss()" title="Позже">✕</button>
+      </div>
+    }
+    @case ("downloading") {
+      <div class="upd upd--accent">
+        <div class="upd-progress" [style.--p.%]="percent()"></div>
+        <span class="upd-text">Загрузка {{ state.version }} — {{ percent() }}%</span>
+      </div>
+    }
+    @case ("error") {
+      <div class="upd upd--error">
+        <span class="upd-text">Не удалось обновить: {{ state.message }}</span>
+        <button type="button" class="upd-cta" (click)="updater.check()">Повторить</button>
+        <button type="button" class="upd-x" (click)="updater.dismiss()" title="Скрыть">✕</button>
+      </div>
+    }
+  }
+}

@@ -1,0 +1,68 @@
+/* portist — дизайн-токены «технический терминал» */
+:root {
+  --bg: #0b0e11;
+  --panel: #0f151b;
+  --panel-hi: #131b22;
+  --panel-row: #131b22;
+  --row-hover: #18222b;
+  --line: #1e2a35;
+  --text: #c8d3dc;
+  --muted: #5e707d;
+  --muted-dim: #3c4a55;
+  --signal: #39ff8b; /* фосфорно-зелёный — активный LISTEN */
+  --signal-dim: #1c7f49;
+  --alert: #ff5c57; /* завершить / системные */
+  --udp: #e0a23c;
+
+  --font-mono: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas,
+    "Liberation Mono", monospace;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  margin: 0;
+  padding: 0;
+  height: 100%;
+  /* Окно прозрачное: за скруглёнными углами .shell просвечивает рабочий стол. */
+  background: transparent;
+  overflow: hidden;
+  font-family: var(--font-mono);
+  color: var(--text);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
+  user-select: none;
+  cursor: default;
+}
+
+app-root {
+  display: block;
+  height: 100%;
+}
+
+button {
+  font-family: var(--font-mono);
+}
+
+:focus-visible {
+  outline: 1px solid var(--signal);
+  outline-offset: 1px;
+}
+
+::-webkit-scrollbar {
+  width: 8px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: var(--line);
+  border-radius: 4px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #2a3742;
+}

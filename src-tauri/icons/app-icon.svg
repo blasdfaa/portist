@@ -1,0 +1,38 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1024" height="1024" viewBox="0 0 1024 1024">
+  <defs>
+    <linearGradient id="tile" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#18232e"/>
+      <stop offset="1" stop-color="#0a0f14"/>
+    </linearGradient>
+    <radialGradient id="screen" cx="0.5" cy="0.46" r="0.55">
+      <stop offset="0" stop-color="#39ff8b" stop-opacity="0.16"/>
+      <stop offset="1" stop-color="#39ff8b" stop-opacity="0"/>
+    </radialGradient>
+    <filter id="glow" x="-40%" y="-40%" width="180%" height="180%">
+      <feGaussianBlur stdDeviation="22"/>
+    </filter>
+  </defs>
+
+  <!-- squircle-тайл -->
+  <rect x="94" y="94" width="836" height="836" rx="190" fill="url(#tile)"/>
+  <!-- фосфорное свечение «экрана» -->
+  <rect x="94" y="94" width="836" height="836" rx="190" fill="url(#screen)"/>
+  <!-- внутренняя рамка -->
+  <rect x="95.5" y="95.5" width="833" height="833" rx="188.5" fill="none" stroke="#27394b" stroke-width="3"/>
+  <!-- верхний блик -->
+  <rect x="120" y="118" width="784" height="280" rx="170" fill="#ffffff" opacity="0.03"/>
+
+  <!-- знак :▮ — фосфорно-зелёный, с свечением -->
+  <g transform="translate(247,229) scale(25.7)">
+    <g fill="#39ff8b" filter="url(#glow)" opacity="0.85">
+      <circle cx="6" cy="8" r="1.7"/>
+      <circle cx="6" cy="14" r="1.7"/>
+      <rect x="11.3" y="4" width="5" height="14" rx="2.2"/>
+    </g>
+    <g fill="#39ff8b">
+      <circle cx="6" cy="8" r="1.7"/>
+      <circle cx="6" cy="14" r="1.7"/>
+      <rect x="11.3" y="4" width="5" height="14" rx="2.2"/>
+    </g>
+  </g>
+</svg>

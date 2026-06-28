@@ -1,0 +1,86 @@
+:host {
+  display: block;
+}
+
+.upd {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 7px 10px 7px 12px;
+  font-size: 11px;
+  border-bottom: 1px solid var(--line);
+  background: var(--panel-hi);
+  overflow: hidden;
+}
+
+.upd--accent {
+  border-left: 2px solid var(--signal);
+}
+.upd--error {
+  border-left: 2px solid var(--alert);
+}
+.upd--info {
+  color: var(--muted);
+}
+
+.upd-text {
+  flex: 1 1 auto;
+  color: var(--text);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.upd-text b {
+  color: var(--signal);
+  font-weight: 700;
+}
+
+/* Полоса прогресса заливает фон строки слева направо. */
+.upd-progress {
+  position: absolute;
+  inset: 0 auto 0 0;
+  width: var(--p, 0%);
+  background: var(--signal-dim);
+  opacity: 0.35;
+  transition: width 0.2s linear;
+  pointer-events: none;
+}
+
+.upd-cta {
+  flex: 0 0 auto;
+  padding: 3px 10px;
+  font: inherit;
+  font-weight: 700;
+  color: var(--bg);
+  background: var(--signal);
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+}
+.upd-cta:hover {
+  filter: brightness(1.1);
+}
+
+.upd-x {
+  flex: 0 0 auto;
+  padding: 2px 5px;
+  font: inherit;
+  color: var(--muted);
+  background: transparent;
+  border: none;
+  cursor: pointer;
+}
+.upd-x:hover {
+  color: var(--text);
+}
+
+.upd-spin {
+  display: inline-block;
+  animation: upd-rotate 1s linear infinite;
+}
+@keyframes upd-rotate {
+  to {
+    transform: rotate(360deg);
+  }
+}
