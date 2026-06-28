@@ -29,12 +29,13 @@ updater откажется ставить.
 
    `endpoints`/`pubkey` зашиты в бинарь — менять можно только пересборкой.
 
-2. **Секреты репозитория** (Settings → Secrets and variables → Actions):
+2. **Секрет репозитория** (Settings → Secrets and variables → Actions):
    - `TAURI_SIGNING_PRIVATE_KEY` — содержимое `~/.tauri/portist_updater.key`
      (`cat ~/.tauri/portist_updater.key`, вставить целиком).
-   - `TAURI_SIGNING_PRIVATE_KEY_PASSWORD` — пароль ключа (у нас пустой, можно
-     создать секрет с пустым значением или убрать строку из workflow).
 
+   Пароль ключа не нужен: ключ сгенерирован без пароля, и в workflow
+   `TAURI_SIGNING_PRIVATE_KEY_PASSWORD` зашит пустой строкой. Если когда-нибудь
+   пересоздадите ключ **с** паролем — заведите секрет и подставьте его сюда.
    `GITHUB_TOKEN` создаётся автоматически — добавлять не нужно.
 
 > Потеря приватного ключа = невозможность подписать апдейты. Храните бэкап.

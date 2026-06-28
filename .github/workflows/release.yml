@@ -65,10 +65,12 @@ jobs:
         uses: tauri-apps/tauri-action@v0
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          # Подпись апдейтов — приватный ключ ~/.tauri/portist_updater.key и его пароль
-          # лежат в секретах репозитория (Settings → Secrets and variables → Actions).
+          # Подпись апдейтов. Приватный ключ ~/.tauri/portist_updater.key лежит в
+          # секрете TAURI_SIGNING_PRIVATE_KEY. Ключ сгенерирован без пароля, поэтому
+          # пароль — пустая строка (не из секрета: пустой секрет легко задать неверно,
+          # а отсутствие переменной заставляет tauri читать пароль с tty и падать).
           TAURI_SIGNING_PRIVATE_KEY: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY }}
-          TAURI_SIGNING_PRIVATE_KEY_PASSWORD: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY_PASSWORD }}
+          TAURI_SIGNING_PRIVATE_KEY_PASSWORD: ""
         with:
           tagName: ${{ github.ref_name }}
           releaseName: "portist ${{ github.ref_name }}"
