@@ -4,6 +4,7 @@ import { Router } from "@angular/router";
 import type { PortInfo } from "../../core/models";
 import { ShellApi } from "../../core/shell-api";
 import { DetailSession } from "../../detail/detail-session";
+import type { GroupedPort } from "../grouped-port";
 import { PortInventory } from "../port-inventory";
 import { PortRow } from "../port-row/port-row";
 
@@ -30,18 +31,15 @@ export class PortsList {
     void this.router.navigate(["/settings"]);
   }
 
-  /** Раскрыть порт: выбираем его и переходим на карточку деталей. */
-  openDetail(port: PortInfo): void {
-    this.detail.select(port);
+  /** Раскрыть строку: открываем сессию и переходим на карточку деталей. */
+  openDetail(row: GroupedPort): void {
+    this.detail.open(row);
     void this.router.navigate(["/detail"]);
   }
 
-  async open(port: PortInfo): Promise<void> {
-    try {
-      await this.shell.openInBrowser(port.port);
-    } catch (err) {
-      console.error(err);
-    }
+  /** Открыть localhost:PORT в браузере (политику отказа держит ShellApi). */
+  open(port: PortInfo): void {
+    void this.shell.openInBrowser(port.port);
   }
 
   async kill(port: PortInfo): Promise<void> {

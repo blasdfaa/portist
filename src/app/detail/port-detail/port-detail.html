@@ -31,7 +31,7 @@
           ↗
         </button>
       }
-      @if (port().isCurrentUser && port().pid !== null) {
+      @if (killable()) {
         <button
           type="button"
           class="act act--kill"

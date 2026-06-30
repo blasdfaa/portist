@@ -9,6 +9,8 @@ export interface GroupedPort {
   port: PortInfo;
   /** Показывать ли «открыть в браузере». */
   canOpen: boolean;
+  /** Можно ли завершить процесс (свой процесс с известным PID). */
+  killable: boolean;
   /** Имя сервиса по номеру порта (IANA), если известно. */
   serviceName: string | null;
 }

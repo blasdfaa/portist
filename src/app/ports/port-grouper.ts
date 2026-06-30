@@ -1,9 +1,9 @@
 import { Injectable, inject } from "@angular/core";
 
-import type { PortContext, PortInfo } from "../core/models";
+import type { PortInfo } from "../core/models";
 import { serviceName } from "../core/port-catalog";
 import type { GroupedPort, PortGroup } from "./grouped-port";
-import { PORT_GROUP_RULES } from "./group-rule";
+import { type GroupRule, PORT_GROUP_RULES } from "./group-rule";
 
 /**
  * Раскладывает порты по корзинам согласно реестру правил.
@@ -17,7 +17,8 @@ export class PortGrouper {
 
   /**
    * Группирует порты в обогащённые строки. Правило сопоставляется один раз на
-   * порт; из того же совпадения берутся `canOpen` и (через каталог) `serviceName`.
+   * порт; из того же совпадения рождаются все производные факты строки
+   * (`canOpen`, `killable`, `serviceName`) — без повторного match на рендер.
    */
   group(ports: PortInfo[]): PortGroup[] {
     const buckets = new Map<string, PortGroup>(
@@ -28,43 +29,24 @@ export class PortGrouper {
     );
 
     for (const port of ports) {
-      const ctx = this.toContext(port);
-      const rule = this.matchRule(ctx);
+      const rule = this.matchRule(port.port);
       if (!rule) continue;
-      buckets.get(rule.id)?.rows.push(this.toRow(port, ctx, rule.canOpenInBrowser));
+      buckets.get(rule.id)?.rows.push(this.toRow(port, rule));
     }
 
     return [...buckets.values()].filter((group) => group.rows.length > 0);
   }
 
-  /** Стоит ли показывать «открыть в браузере» для одиночного порта (экран деталей). */
-  canOpenInBrowser(port: PortInfo): boolean {
-    const ctx = this.toContext(port);
-    return this.matchRule(ctx)?.canOpenInBrowser?.(ctx) ?? false;
-  }
-
-  private toRow(
-    port: PortInfo,
-    ctx: PortContext,
-    canOpen: ((ctx: PortContext) => boolean) | undefined,
-  ): GroupedPort {
+  private toRow(port: PortInfo, rule: GroupRule): GroupedPort {
     return {
       port,
-      canOpen: canOpen?.(ctx) ?? false,
+      canOpen: rule.canOpenInBrowser?.(port.port) ?? false,
+      killable: port.isCurrentUser && port.pid !== null,
       serviceName: serviceName(port.port),
     };
   }
 
-  private matchRule(ctx: PortContext) {
-    return this.rules.find((rule) => rule.match(ctx));
-  }
-
-  private toContext(port: PortInfo): PortContext {
-    return {
-      port: port.port,
-      protocol: port.protocol,
-      processName: port.processName,
-      address: port.address,
-    };
+  private matchRule(port: number): GroupRule | undefined {
+    return this.rules.find((rule) => rule.match(port));
   }
 }

@@ -1,13 +1,13 @@
 import {
   ChangeDetectionStrategy,
   Component,
+  type OnDestroy,
   computed,
   inject,
   signal,
 } from "@angular/core";
 import { Router } from "@angular/router";
 
-import { serviceName } from "../../core/port-catalog";
 import { ShellApi } from "../../core/shell-api";
 import { PortInventory } from "../../ports/port-inventory";
 import { DetailSession } from "../detail-session";
@@ -23,14 +23,19 @@ import {
   templateUrl: "./port-detail.html",
   styleUrl: "./port-detail.css",
 })
-export class PortDetail {
+export class PortDetail implements OnDestroy {
   private readonly shell = inject(ShellApi);
   private readonly inventory = inject(PortInventory);
   private readonly session = inject(DetailSession);
   private readonly router = inject(Router);
 
-  /** Выбранный порт. Маршрут защищён guard'ом, поэтому здесь всегда задан. */
-  readonly port = computed(() => this.session.selected()!);
+  /** Раскрытая строка. Маршрут защищён guard'ом, поэтому здесь всегда задана. */
+  private readonly row = computed(() => this.session.selected()!);
+
+  readonly port = computed(() => this.row().port);
+  /** Производные факты строки — посчитаны при группировке, не выводим заново. */
+  readonly canOpen = computed(() => this.row().canOpen);
+  readonly killable = computed(() => this.row().killable);
 
   /** Детали из ресурса; null, пока значения нет (idle/загрузка). */
   readonly details = computed(() =>
@@ -43,7 +48,6 @@ export class PortDetail {
     const err = this.session.details.error();
     return err ? String(err) : this.inventory.error();
   });
-  readonly canOpen = computed(() => this.inventory.canOpenInBrowser(this.port()));
 
   /** id поля, чьё значение только что скопировали (для фидбэка). */
   readonly copiedId = signal<string | null>(null);
@@ -53,7 +57,7 @@ export class PortDetail {
   private readonly ctx = computed<PortDetailContext>(() => ({
     port: this.port(),
     details: this.details(),
-    serviceName: serviceName(this.port().port),
+    serviceName: this.row().serviceName,
     canOpen: this.canOpen(),
   }));
 
@@ -72,18 +76,19 @@ export class PortDetail {
     }).filter((item) => item.value !== null && item.value !== "");
   });
 
+  /** Уход с карточки закрывает сессию — выбор сбрасывается у её владельца. */
+  ngOnDestroy(): void {
+    this.session.close();
+  }
+
   /** Назад к списку портов. */
   back(): void {
     void this.router.navigate(["/"]);
   }
 
-  /** Открыть localhost:PORT в браузере. */
-  async open(): Promise<void> {
-    try {
-      await this.shell.openInBrowser(this.port().port);
-    } catch (err) {
-      console.error(err);
-    }
+  /** Открыть localhost:PORT в браузере (политику отказа держит ShellApi). */
+  open(): void {
+    void this.shell.openInBrowser(this.port().port);
   }
 
   /** Завершить процесс и, при успехе, вернуться к списку. */

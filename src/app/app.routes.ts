@@ -4,7 +4,7 @@ import { type CanActivateFn, Router, type Routes } from "@angular/router";
 import { DetailSession } from "./detail/detail-session";
 import { PortDetail } from "./detail/port-detail/port-detail";
 import { PortsList } from "./ports/ports-list/ports-list";
-import { Settings } from "./settings/settings/settings";
+import { Settings } from "./settings/settings";
 
 /** Карточку открываем только при выбранном порте, иначе — назад к списку. */
 const detailGuard: CanActivateFn = () =>

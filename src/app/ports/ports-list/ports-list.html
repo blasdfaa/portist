@@ -89,9 +89,8 @@
           </div>
           @for (row of group.rows; track row.port.protocol + row.port.port) {
             <app-port-row
-              [port]="row.port"
-              [canOpen]="row.canOpen"
-              (select)="openDetail(row.port)"
+              [row]="row"
+              (select)="openDetail(row)"
               (open)="open(row.port)"
               (kill)="kill(row.port)"
             />

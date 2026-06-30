@@ -66,9 +66,4 @@ export class PortInventory {
     await this.refresh();
     return true;
   }
-
-  /** Стоит ли показывать кнопку «открыть в браузере» для порта. */
-  canOpenInBrowser(port: PortInfo): boolean {
-    return this.grouper.canOpenInBrowser(port);
-  }
 }

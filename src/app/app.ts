@@ -6,11 +6,11 @@ import {
 } from "@angular/core";
 import { Router, RouterOutlet } from "@angular/router";
 
-import { ShellApi } from "../core/shell-api";
-import { PortInventory } from "../ports/port-inventory";
-import { Theme } from "../settings/theme";
-import { AppUpdater } from "../update/app-updater";
-import { UpdateBanner } from "../update/update-banner/update-banner";
+import { ShellApi } from "./core/shell-api";
+import { PortInventory } from "./ports/port-inventory";
+import { Theme } from "./settings/theme";
+import { AppUpdater } from "./update/app-updater";
+import { UpdateBanner } from "./update/update-banner/update-banner";
 
 @Component({
   selector: "app-root",

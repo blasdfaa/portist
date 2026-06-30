@@ -7,9 +7,9 @@ import {
 } from "@angular/core";
 import { Router } from "@angular/router";
 
-import { ShellApi } from "../../core/shell-api";
-import { SettingRow } from "../setting-row/setting-row";
-import { Theme, type ThemeMode } from "../theme";
+import { ShellApi } from "../core/shell-api";
+import { SettingRow } from "./setting-row/setting-row";
+import { Theme, type ThemeMode } from "./theme";
 
 /** Опция переключателя темы: значение, подпись (a11y/тултип) и глиф. */
 interface ThemeOption {

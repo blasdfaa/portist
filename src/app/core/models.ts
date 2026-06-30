@@ -15,14 +15,6 @@ export interface PortInfo {
   address: string;
 }
 
-/** Срез данных порта, по которому правила решают группу и «открываемость». */
-export interface PortContext {
-  port: number;
-  protocol: Protocol;
-  processName: string | null;
-  address: string;
-}
-
 /** Расширенные сведения о процессе (грузятся по запросу при раскрытии порта). */
 export interface PortDetails {
   pid: number;

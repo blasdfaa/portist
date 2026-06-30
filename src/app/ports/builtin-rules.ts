@@ -13,7 +13,7 @@ const databaseRule: GroupRule = {
   id: "database",
   label: "Базы данных",
   order: 10,
-  match: (ctx) => kindOf(ctx.port) === "database",
+  match: (port) => kindOf(port) === "database",
   canOpenInBrowser: () => false,
 };
 
@@ -21,7 +21,7 @@ const devRule: GroupRule = {
   id: "dev",
   label: "Разработка",
   order: 20,
-  match: (ctx) => kindOf(ctx.port) === "dev",
+  match: (port) => kindOf(port) === "dev",
   canOpenInBrowser: () => true,
 };
 
@@ -29,8 +29,8 @@ const systemRule: GroupRule = {
   id: "system",
   label: "Системные",
   order: 30,
-  match: (ctx) => ctx.port < 1024,
-  canOpenInBrowser: (ctx) => isLikelyHttp(ctx.port),
+  match: (port) => port < 1024,
+  canOpenInBrowser: (port) => isLikelyHttp(port),
 };
 
 const otherRule: GroupRule = {
@@ -38,7 +38,7 @@ const otherRule: GroupRule = {
   label: "Прочее",
   order: 40,
   match: () => true, // fallback — должен идти последним
-  canOpenInBrowser: (ctx) => isLikelyHttp(ctx.port),
+  canOpenInBrowser: (port) => isLikelyHttp(port),
 };
 
 /** Встроенные правила, готовые к подключению в провайдеры приложения. */

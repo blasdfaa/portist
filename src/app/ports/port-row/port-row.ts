@@ -1,6 +1,6 @@
 import { ChangeDetectionStrategy, Component, input, output } from "@angular/core";
 
-import type { PortInfo } from "../../core/models";
+import type { GroupedPort } from "../grouped-port";
 
 /** Одна «терминальная запись» порта: статус, :порт, процесс, PID и действия. */
 @Component({
@@ -10,8 +10,8 @@ import type { PortInfo } from "../../core/models";
   styleUrl: "./port-row.css",
 })
 export class PortRow {
-  readonly port = input.required<PortInfo>();
-  readonly canOpen = input<boolean>(false);
+  /** Обогащённая строка списка — все производные факты уже посчитаны. */
+  readonly row = input.required<GroupedPort>();
   readonly select = output<void>();
   readonly open = output<void>();
   readonly kill = output<void>();

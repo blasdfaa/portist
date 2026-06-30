@@ -1,9 +1,9 @@
 import { InjectionToken } from "@angular/core";
 
-import type { PortContext } from "../core/models";
-
 /**
- * Правило группировки портов. Чистый предикат от контекста порта.
+ * Правило группировки портов. Чистый предикат от номера порта — факты о
+ * конкретных номерах правило берёт из Port Catalog, политику диапазонов
+ * (`port < 1024`, fallback) держит само.
  *
  * Чтобы добавить новую группу, не трогая существующий код, зарегистрируйте
  * ещё один провайдер токена {@link PORT_GROUP_RULES} (multi: true).
@@ -16,9 +16,9 @@ export interface GroupRule {
   /** Порядок проверки и отображения (меньше — раньше). */
   order: number;
   /** Подходит ли порт под эту группу. Первое сработавшее правило выигрывает. */
-  match: (ctx: PortContext) => boolean;
+  match: (port: number) => boolean;
   /** Стоит ли предлагать «открыть в браузере» (вероятно-HTTP). */
-  canOpenInBrowser?: (ctx: PortContext) => boolean;
+  canOpenInBrowser?: (port: number) => boolean;
 }
 
 /** Мульти-провайдерный токен со всеми правилами группировки. */
