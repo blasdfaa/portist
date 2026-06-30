@@ -3,9 +3,9 @@ import {
   Component,
   computed,
   inject,
-  output,
   signal,
 } from "@angular/core";
+import { Router } from "@angular/router";
 
 import { ShellApi } from "../../core/shell-api";
 import { SettingRow } from "../setting-row/setting-row";
@@ -28,16 +28,19 @@ interface ThemeOption {
 })
 export class Settings {
   private readonly shell = inject(ShellApi);
+  private readonly router = inject(Router);
   protected readonly theme = inject(Theme);
-
-  /** Назад к списку портов. */
-  readonly back = output<void>();
 
   /** Версия приложения; пусто, пока не загрузилась. */
   protected readonly version = signal("");
 
   constructor() {
     void this.shell.appVersion().then((v) => this.version.set(v));
+  }
+
+  /** Назад к списку портов. */
+  back(): void {
+    void this.router.navigate(["/"]);
   }
 
   protected readonly themeOptions: ThemeOption[] = [

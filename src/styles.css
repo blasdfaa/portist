@@ -102,3 +102,71 @@ button {
 ::-webkit-scrollbar-thumb:hover {
   background: var(--muted-dim);
 }
+
+/* Смена экранов через View Transitions API (роутер вызывает startViewTransition
+   на каждом переходе). Анимируем именованную группу `screen` — обёртку
+   роут-аутлета: рамка оболочки и баннер остаются на месте. Направление
+   (vt-forward / vt-back) роутер ставит на <html> (см. app.config.ts). */
+::view-transition-group(screen) {
+  animation-duration: 0.22s;
+  animation-timing-function: ease;
+}
+html.vt-forward::view-transition-old(screen) {
+  animation: screenOutLeft 0.22s ease both;
+}
+html.vt-forward::view-transition-new(screen) {
+  animation: screenInRight 0.22s ease both;
+}
+html.vt-back::view-transition-old(screen) {
+  animation: screenOutRight 0.22s ease both;
+}
+html.vt-back::view-transition-new(screen) {
+  animation: screenInLeft 0.22s ease both;
+}
+@keyframes screenInRight {
+  from {
+    opacity: 0;
+    transform: translateX(22px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+@keyframes screenOutLeft {
+  from {
+    opacity: 1;
+    transform: translateX(0);
+  }
+  to {
+    opacity: 0;
+    transform: translateX(-22px);
+  }
+}
+@keyframes screenInLeft {
+  from {
+    opacity: 0;
+    transform: translateX(-22px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+@keyframes screenOutRight {
+  from {
+    opacity: 1;
+    transform: translateX(0);
+  }
+  to {
+    opacity: 0;
+    transform: translateX(22px);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  ::view-transition-group(screen),
+  ::view-transition-old(screen),
+  ::view-transition-new(screen) {
+    animation: none !important;
+  }
+}

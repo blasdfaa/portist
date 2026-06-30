@@ -3,20 +3,20 @@ import {
   Component,
   computed,
   inject,
-  input,
-  output,
   signal,
 } from "@angular/core";
+import { Router } from "@angular/router";
 
-import type { PortDetails, PortInfo } from "../../core/models";
 import { serviceName } from "../../core/port-catalog";
 import { ShellApi } from "../../core/shell-api";
+import { PortInventory } from "../../ports/port-inventory";
+import { DetailSession } from "../detail-session";
 import {
   PORT_DETAIL_FIELDS,
   type PortDetailContext,
 } from "../port-detail-fields";
 
-/** Карточка деталей одного порта. Поля берутся из реестра PORT_DETAIL_FIELDS. */
+/** Карточка деталей выбранного порта. Поля берутся из реестра PORT_DETAIL_FIELDS. */
 @Component({
   selector: "app-port-detail",
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -25,16 +25,25 @@ import {
 })
 export class PortDetail {
   private readonly shell = inject(ShellApi);
+  private readonly inventory = inject(PortInventory);
+  private readonly session = inject(DetailSession);
+  private readonly router = inject(Router);
 
-  readonly port = input.required<PortInfo>();
-  readonly details = input<PortDetails | null>(null);
-  readonly loading = input<boolean>(false);
-  readonly error = input<string | null>(null);
-  readonly canOpen = input<boolean>(false);
+  /** Выбранный порт. Маршрут защищён guard'ом, поэтому здесь всегда задан. */
+  readonly port = computed(() => this.session.selected()!);
 
-  readonly back = output<void>();
-  readonly open = output<void>();
-  readonly kill = output<void>();
+  /** Детали из ресурса; null, пока значения нет (idle/загрузка). */
+  readonly details = computed(() =>
+    this.session.details.hasValue() ? this.session.details.value() : null,
+  );
+  readonly loading = computed(() => this.session.details.isLoading());
+
+  /** Ошибка карточки = отказ загрузки деталей или неудавшийся kill. */
+  readonly error = computed(() => {
+    const err = this.session.details.error();
+    return err ? String(err) : this.inventory.error();
+  });
+  readonly canOpen = computed(() => this.inventory.canOpenInBrowser(this.port()));
 
   /** id поля, чьё значение только что скопировали (для фидбэка). */
   readonly copiedId = signal<string | null>(null);
@@ -62,6 +71,27 @@ export class PortDetail {
       };
     }).filter((item) => item.value !== null && item.value !== "");
   });
+
+  /** Назад к списку портов. */
+  back(): void {
+    void this.router.navigate(["/"]);
+  }
+
+  /** Открыть localhost:PORT в браузере. */
+  async open(): Promise<void> {
+    try {
+      await this.shell.openInBrowser(this.port().port);
+    } catch (err) {
+      console.error(err);
+    }
+  }
+
+  /** Завершить процесс и, при успехе, вернуться к списку. */
+  async kill(): Promise<void> {
+    const pid = this.port().pid;
+    if (pid === null) return;
+    if (await this.inventory.kill(pid)) this.back();
+  }
 
   async copy(id: string, text: string): Promise<void> {
     if (!text) return;

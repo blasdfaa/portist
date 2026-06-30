@@ -1,6 +1,6 @@
 <div class="detail">
   <header class="head">
-    <button type="button" class="back" (click)="back.emit()" title="Назад">
+    <button type="button" class="back" (click)="back()" title="Назад">
       ‹
     </button>
     <span class="dot" [class.dot--udp]="port().protocol === 'udp'"></span>
@@ -25,7 +25,7 @@
         <button
           type="button"
           class="act act--open"
-          (click)="open.emit()"
+          (click)="open()"
           [title]="'Открыть localhost:' + port().port"
         >
           ↗
@@ -35,7 +35,7 @@
         <button
           type="button"
           class="act act--kill"
-          (click)="kill.emit()"
+          (click)="kill()"
           title="Завершить процесс"
         >
           ✕

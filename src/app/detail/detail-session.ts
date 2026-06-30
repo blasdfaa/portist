@@ -28,9 +28,4 @@ export class DetailSession {
   select(port: PortInfo): void {
     this._selected.set(port);
   }
-
-  /** Вернуться к списку — ресурс гаснет. */
-  back(): void {
-    this._selected.set(null);
-  }
 }
