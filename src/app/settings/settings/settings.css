@@ -1,0 +1,110 @@
+:host {
+  display: block;
+  height: 100%;
+}
+.settings {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+
+/* Шапка — зеркало карточки деталей */
+.head {
+  flex: 0 0 auto;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 0 12px 0 8px;
+  height: 46px;
+  border-bottom: 1px solid var(--line);
+  background: linear-gradient(180deg, var(--panel-hi), var(--panel));
+}
+.back {
+  width: 26px;
+  height: 26px;
+  display: grid;
+  place-items: center;
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  background: transparent;
+  color: var(--muted);
+  font-size: 20px;
+  line-height: 1;
+  cursor: pointer;
+  transition:
+    color 0.12s ease,
+    border-color 0.12s ease;
+}
+.back:hover {
+  color: var(--signal);
+  border-color: var(--signal-dim);
+}
+.title {
+  color: var(--text);
+  font-weight: 700;
+  font-size: 14px;
+  letter-spacing: 0.3px;
+}
+
+/* Тело со списком настроек */
+.content {
+  flex: 1 1 auto;
+  overflow-y: auto;
+  padding: 2px 14px 14px;
+}
+
+/* Компактный тройной переключатель темы: бегунок + 3 глифа-сегмента */
+.switch {
+  position: relative;
+  display: inline-grid;
+  grid-auto-flow: column;
+  grid-auto-columns: 26px;
+  height: 26px;
+  padding: 2px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: var(--panel-hi);
+}
+.switch-thumb {
+  position: absolute;
+  top: 2px;
+  left: 2px;
+  width: 26px;
+  height: calc(100% - 4px);
+  border-radius: 6px;
+  background: var(--row-hover);
+  transition: transform 0.18s ease;
+}
+.switch-seg {
+  position: relative; /* поверх бегунка */
+  z-index: 1;
+  width: 26px;
+  display: grid;
+  place-items: center;
+  border: none;
+  background: transparent;
+  color: var(--muted);
+  font-size: 13px;
+  line-height: 1;
+  cursor: pointer;
+  transition: color 0.12s ease;
+}
+.switch-seg:hover {
+  color: var(--text);
+}
+.switch-seg--active {
+  color: var(--signal);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .switch-thumb {
+    transition: none;
+  }
+}
+
+/* Номер версии — статичное значение справа в строке */
+.version {
+  font-size: 12px;
+  color: var(--muted);
+  font-variant-numeric: tabular-nums;
+}

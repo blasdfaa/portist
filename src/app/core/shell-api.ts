@@ -1,4 +1,5 @@
 import { Injectable } from "@angular/core";
+import { getVersion } from "@tauri-apps/api/app";
 import { listen, type UnlistenFn } from "@tauri-apps/api/event";
 import { writeText } from "@tauri-apps/plugin-clipboard-manager";
 import { openUrl } from "@tauri-apps/plugin-opener";
@@ -18,6 +19,11 @@ export class ShellApi {
   /** Скопировать текст в буфер обмена. */
   copyText(text: string): Promise<void> {
     return writeText(text);
+  }
+
+  /** Текущая версия приложения (из tauri.conf.json). */
+  appVersion(): Promise<string> {
+    return getVersion();
   }
 
   /** Подписка на событие «поповер показан» (Rust шлёт его при открытии окна). */

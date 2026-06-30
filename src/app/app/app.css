@@ -54,7 +54,8 @@
   border: 1px solid var(--line);
   border-radius: 999px;
 }
-.reload {
+.reload,
+.gear {
   width: 24px;
   height: 24px;
   display: grid;
@@ -69,7 +70,8 @@
     color 0.12s ease,
     border-color 0.12s ease;
 }
-.reload:hover {
+.reload:hover,
+.gear:hover {
   color: var(--signal);
   border-color: var(--signal-dim);
 }
@@ -200,18 +202,23 @@
   color: var(--signal);
 }
 
-/* Подвал */
+/* Подвал — легенда статусов */
 .foot {
   flex: 0 0 auto;
   height: 26px;
   display: flex;
   align-items: center;
-  gap: 7px;
+  gap: 14px;
   padding: 0 14px;
   border-top: 1px solid var(--line);
   font-size: 10px;
   letter-spacing: 0.4px;
   color: var(--muted-dim);
+}
+.foot-item {
+  display: flex;
+  align-items: center;
+  gap: 6px;
 }
 .foot-dot {
   width: 5px;
@@ -219,6 +226,10 @@
   border-radius: 50%;
   background: var(--signal);
   box-shadow: 0 0 5px var(--signal);
+}
+.foot-dot--udp {
+  background: var(--udp);
+  box-shadow: 0 0 5px var(--udp);
 }
 
 @keyframes spin {

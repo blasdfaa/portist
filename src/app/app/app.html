@@ -1,6 +1,8 @@
 <div class="shell">
   <app-update-banner />
-  @if (detail.selected(); as sel) {
+  @if (showSettings()) {
+    <app-settings (back)="showSettings.set(false)" />
+  } @else if (detail.selected(); as sel) {
     <app-port-detail
       [port]="sel"
       [details]="detailDetails() ?? null"
@@ -29,6 +31,14 @@
           title="Обновить"
         >
           ⟳
+        </button>
+        <button
+          type="button"
+          class="gear"
+          (click)="showSettings.set(true)"
+          title="Настройки"
+        >
+          ⚙
         </button>
       </div>
     </header>
@@ -109,8 +119,14 @@
     </div>
 
     <footer class="foot">
-      <span class="foot-dot"></span>
-      <span>LISTEN · правый клик по иконке — меню</span>
+      <span class="foot-item">
+        <span class="foot-dot"></span>
+        <span>LISTEN</span>
+      </span>
+      <span class="foot-item">
+        <span class="foot-dot foot-dot--udp"></span>
+        <span>UDP</span>
+      </span>
     </footer>
   }
 </div>

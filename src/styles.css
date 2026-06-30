@@ -1,4 +1,5 @@
-/* portist — дизайн-токены «технический терминал» */
+/* portist — дизайн-токены «технический терминал».
+   :root — ТЁМНАЯ палитра: она же дефолт и fallback для auto+тёмная-ОС. */
 :root {
   --bg: #0b0e11;
   --panel: #0f151b;
@@ -7,8 +8,8 @@
   --row-hover: #18222b;
   --line: #1e2a35;
   --text: #c8d3dc;
-  --muted: #5e707d;
-  --muted-dim: #3c4a55;
+  --muted: #93a3af;
+  --muted-dim: #7e8f9c;
   --signal: #39ff8b; /* фосфорно-зелёный — активный LISTEN */
   --signal-dim: #1c7f49;
   --alert: #ff5c57; /* завершить / системные */
@@ -16,6 +17,41 @@
 
   --font-mono: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas,
     "Liberation Mono", monospace;
+}
+
+/* СВЕТЛАЯ палитра — те же имена токенов. Включается явным выбором
+   (data-theme="light") и режимом «авто» при светлой системной теме. */
+:root[data-theme="light"] {
+  --bg: #eef1f4;
+  --panel: #ffffff;
+  --panel-hi: #f6f8fa;
+  --panel-row: #f6f8fa;
+  --row-hover: #eef2f6;
+  --line: #dbe2e8;
+  --text: #14202a;
+  --muted: #4e5c67;
+  --muted-dim: #5f6c77;
+  --signal: #097a42;
+  --signal-dim: #57b98a;
+  --alert: #c8362f;
+  --udp: #b07410;
+}
+@media (prefers-color-scheme: light) {
+  :root[data-theme="auto"] {
+    --bg: #eef1f4;
+    --panel: #ffffff;
+    --panel-hi: #f6f8fa;
+    --panel-row: #f6f8fa;
+    --row-hover: #eef2f6;
+    --line: #dbe2e8;
+    --text: #14202a;
+    --muted: #4e5c67;
+    --muted-dim: #5f6c77;
+    --signal: #097a42;
+    --signal-dim: #57b98a;
+    --alert: #c8362f;
+    --udp: #b07410;
+  }
 }
 
 * {
@@ -64,5 +100,5 @@ button {
   border-radius: 4px;
 }
 ::-webkit-scrollbar-thumb:hover {
-  background: #2a3742;
+  background: var(--muted-dim);
 }

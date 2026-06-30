@@ -1,0 +1,39 @@
+<div class="settings">
+  <header class="head" data-tauri-drag-region>
+    <button type="button" class="back" (click)="back.emit()" title="Назад">
+      ‹
+    </button>
+    <span class="title">Настройки</span>
+  </header>
+
+  <div class="content">
+    <app-setting-row label="Тема">
+      <div class="switch" role="radiogroup" aria-label="Тема оформления">
+        <span
+          class="switch-thumb"
+          [style.transform]="'translateX(' + activeIndex() * 100 + '%)'"
+        ></span>
+        @for (opt of themeOptions; track opt.value) {
+          <button
+            type="button"
+            class="switch-seg"
+            role="radio"
+            [class.switch-seg--active]="theme.mode() === opt.value"
+            [attr.aria-checked]="theme.mode() === opt.value"
+            [attr.aria-label]="opt.label"
+            [title]="opt.label"
+            (click)="theme.setMode(opt.value)"
+          >
+            {{ opt.glyph }}
+          </button>
+        }
+      </div>
+    </app-setting-row>
+
+    <app-setting-row label="Версия">
+      @if (version()) {
+        <span class="version">v{{ version() }}</span>
+      }
+    </app-setting-row>
+  </div>
+</div>
