@@ -85,15 +85,53 @@
           <div class="group-head">
             <span class="group-label">{{ group.label }}</span>
             <span class="group-rule"></span>
-            <span class="group-count">{{ group.rows.length }}</span>
+            <span class="group-count">{{ groupSize(group) }}</span>
           </div>
-          @for (row of group.rows; track row.port.protocol + row.port.port) {
-            <app-port-row
-              [row]="row"
-              (select)="openDetail(row)"
-              (open)="open(row.port)"
-              (kill)="kill(row.port)"
-            />
+
+          @if (group.subGroups) {
+            @for (sub of group.subGroups; track sub.id) {
+              <div class="subgroup">
+                <button
+                  type="button"
+                  class="subgroup-head"
+                  [attr.aria-expanded]="isExpanded(sub.id)"
+                  (click)="toggleProject(sub.id)"
+                >
+                  <span
+                    class="subgroup-caret"
+                    [class.subgroup-caret--open]="isExpanded(sub.id)"
+                    [attr.aria-hidden]="true"
+                    >▸</span
+                  >
+                  <span class="subgroup-label">{{ sub.label }}</span>
+                  <span class="subgroup-count">{{ sub.rows.length }}</span>
+                </button>
+                @if (isExpanded(sub.id)) {
+                  @for (
+                    row of sub.rows;
+                    track row.port.protocol + row.port.port
+                  ) {
+                    <app-port-row
+                      [row]="row"
+                      (select)="openDetail(row)"
+                      (open)="open(row.port)"
+                      (kill)="kill(row.port)"
+                      (stop)="stop(row)"
+                    />
+                  }
+                }
+              </div>
+            }
+          } @else {
+            @for (row of group.rows; track row.port.protocol + row.port.port) {
+              <app-port-row
+                [row]="row"
+                (select)="openDetail(row)"
+                (open)="open(row.port)"
+                (kill)="kill(row.port)"
+                (stop)="stop(row)"
+              />
+            }
           }
         </section>
       }

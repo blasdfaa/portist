@@ -1,4 +1,10 @@
-import { ChangeDetectionStrategy, Component, input, output } from "@angular/core";
+import {
+  ChangeDetectionStrategy,
+  Component,
+  input,
+  output,
+  signal,
+} from "@angular/core";
 
 import type { GroupedPort } from "../grouped-port";
 
@@ -15,4 +21,22 @@ export class PortRow {
   readonly select = output<void>();
   readonly open = output<void>();
   readonly kill = output<void>();
+  /** Запрос на остановку контейнера (только для docker-строк). */
+  readonly stop = output<void>();
+
+  /** Показывать ли инлайн-подтверждение остановки контейнера. */
+  protected readonly confirming = signal(false);
+
+  protected askStop(): void {
+    this.confirming.set(true);
+  }
+
+  protected cancelStop(): void {
+    this.confirming.set(false);
+  }
+
+  protected confirmStop(): void {
+    this.confirming.set(false);
+    this.stop.emit();
+  }
 }

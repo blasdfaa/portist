@@ -38,3 +38,25 @@ export interface PortDetails {
   /** виртуальная память, байты. */
   virtualMemory: number;
 }
+
+/** Один опубликованный на хост порт контейнера (приходит из Rust как есть). */
+export interface ContainerPort {
+  /** Порт на стороне хоста; null — порт не опубликован. */
+  publicPort: number | null;
+  protocol: Protocol;
+}
+
+/** Docker-контейнер и его опубликованные порты. Джойн с портом делает фронт. */
+export interface ContainerInfo {
+  /** Полный id контейнера (по нему шлём stop). */
+  id: string;
+  /** Имя контейнера (ведущий `/` уже убран). */
+  name: string;
+  /** Образ, например "postgres:16". */
+  image: string;
+  /** Имя compose-проекта, если контейнер поднят из compose; иначе null. */
+  composeProject: string | null;
+  /** Имя compose-сервиса; иначе null. */
+  composeService: string | null;
+  ports: ContainerPort[];
+}

@@ -43,6 +43,39 @@
   color: var(--muted-dim);
 }
 
+/* Docker-строка: 🐳 · сервис/имя · образ. Не раскрывается. */
+.row--docker {
+  cursor: default;
+}
+.proc--docker {
+  display: flex;
+  align-items: baseline;
+  gap: 6px;
+  overflow: hidden;
+}
+.whale {
+  font-size: 10px;
+  flex-shrink: 0;
+}
+.cname {
+  color: var(--text);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  flex-shrink: 0;
+  max-width: 55%;
+}
+.image {
+  color: var(--muted-dim);
+  font-size: 11px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.chev--empty {
+  visibility: hidden;
+}
+
 .meta {
   display: flex;
   align-items: center;
@@ -96,6 +129,54 @@
 .act--kill:hover {
   color: var(--alert);
   background: color-mix(in srgb, var(--alert) 14%, transparent);
+}
+.act--stop:hover {
+  color: var(--alert);
+  background: color-mix(in srgb, var(--alert) 14%, transparent);
+}
+
+/* Инлайн-подтверждение остановки контейнера. */
+.row--confirm {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  height: 34px;
+  padding: 0 10px 0 14px;
+  border-radius: 7px;
+  background: color-mix(in srgb, var(--alert) 10%, transparent);
+}
+.confirm-text {
+  color: var(--text);
+  font-size: 12px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.confirm-actions {
+  display: flex;
+  gap: 6px;
+  flex-shrink: 0;
+}
+.confirm-btn {
+  border: none;
+  border-radius: 5px;
+  padding: 4px 10px;
+  font-size: 11px;
+  line-height: 1;
+  cursor: pointer;
+  background: var(--line);
+  color: var(--muted);
+}
+.confirm-btn:hover {
+  color: var(--text);
+}
+.confirm-btn--danger {
+  background: color-mix(in srgb, var(--alert) 18%, transparent);
+  color: var(--alert);
+}
+.confirm-btn--danger:hover {
+  background: color-mix(in srgb, var(--alert) 28%, transparent);
 }
 
 .chev {

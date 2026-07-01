@@ -1,4 +1,4 @@
-import type { PortDetails, PortInfo } from "../core/models";
+import type { ContainerInfo, PortDetails, PortInfo } from "../core/models";
 import type { PortBridge } from "../core/port-bridge";
 
 /**
@@ -13,13 +13,19 @@ export class FakePortBridge implements PortBridge {
   ports: PortInfo[] = [];
   /** Детали по PID, которые вернёт `portDetails`. */
   detailsByPid = new Map<number, PortDetails>();
+  /** Что вернёт `listContainers`. */
+  containers: ContainerInfo[] = [];
   /** PID, по которым был вызван `killProcess`, в порядке вызова. */
   readonly killed: number[] = [];
+  /** id контейнеров, по которым был вызван `stopContainer`, в порядке вызова. */
+  readonly stopped: string[] = [];
 
   /** Если задано — соответствующая команда отклоняется этой ошибкой. */
   rejectListPorts?: unknown;
   rejectKill?: unknown;
   rejectDetails?: unknown;
+  rejectListContainers?: unknown;
+  rejectStop?: unknown;
 
   async listPorts(): Promise<PortInfo[]> {
     if (this.rejectListPorts !== undefined) throw this.rejectListPorts;
@@ -36,5 +42,15 @@ export class FakePortBridge implements PortBridge {
     const details = this.detailsByPid.get(pid);
     if (!details) throw new Error(`Нет деталей для PID ${pid}`);
     return details;
+  }
+
+  async listContainers(): Promise<ContainerInfo[]> {
+    if (this.rejectListContainers !== undefined) throw this.rejectListContainers;
+    return this.containers;
+  }
+
+  async stopContainer(id: string): Promise<void> {
+    if (this.rejectStop !== undefined) throw this.rejectStop;
+    this.stopped.push(id);
   }
 }

@@ -1,7 +1,7 @@
 import { Injectable } from "@angular/core";
 import { invoke } from "@tauri-apps/api/core";
 
-import type { PortDetails, PortInfo } from "./models";
+import type { ContainerInfo, PortDetails, PortInfo } from "./models";
 import type { PortBridge } from "./port-bridge";
 
 /** Прод-адаптер шва: команды Rust через мост Tauri. */
@@ -17,5 +17,13 @@ export class TauriPortBridge implements PortBridge {
 
   portDetails(pid: number): Promise<PortDetails> {
     return invoke<PortDetails>("get_port_details", { pid });
+  }
+
+  listContainers(): Promise<ContainerInfo[]> {
+    return invoke<ContainerInfo[]>("list_containers");
+  }
+
+  stopContainer(id: string): Promise<void> {
+    return invoke<void>("stop_container", { id });
   }
 }

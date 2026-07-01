@@ -4,7 +4,7 @@ import { Router } from "@angular/router";
 import type { PortInfo } from "../../core/models";
 import { ShellApi } from "../../core/shell-api";
 import { DetailSession } from "../../detail/detail-session";
-import type { GroupedPort } from "../grouped-port";
+import type { GroupedPort, PortGroup } from "../grouped-port";
 import { PortInventory } from "../port-inventory";
 import { PortRow } from "../port-row/port-row";
 
@@ -45,5 +45,28 @@ export class PortsList {
   async kill(port: PortInfo): Promise<void> {
     if (port.pid === null) return;
     await this.inventory.kill(port.pid);
+  }
+
+  /** Остановить контейнер docker-строки. */
+  async stop(row: GroupedPort): Promise<void> {
+    const id = row.container?.id;
+    if (!id) return;
+    await this.inventory.stopContainer(id);
+  }
+
+  /** Число портов в группе (для плоских — строки, для «Docker» — сумма проектов). */
+  groupSize(group: PortGroup): number {
+    if (!group.subGroups) return group.rows.length;
+    return group.subGroups.reduce((n, sub) => n + sub.rows.length, 0);
+  }
+
+  /** Раскрыт ли docker-проект. При активном поиске раскрыты все — чтобы видеть совпадения. */
+  isExpanded(subId: string): boolean {
+    if (this.inventory.query().trim()) return true;
+    return !this.inventory.collapsed().has(subId);
+  }
+
+  toggleProject(subId: string): void {
+    this.inventory.toggleProject(subId);
   }
 }

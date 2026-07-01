@@ -1,6 +1,6 @@
 import { InjectionToken } from "@angular/core";
 
-import type { PortDetails, PortInfo } from "./models";
+import type { ContainerInfo, PortDetails, PortInfo } from "./models";
 
 /**
  * Узкий шов к бэкенду — ровно те data-команды, от которых зависят глубокие
@@ -18,6 +18,10 @@ export interface PortBridge {
   killProcess(pid: number): Promise<void>;
   /** Детали процесса по PID (грузятся при раскрытии порта). */
   portDetails(pid: number): Promise<PortDetails>;
+  /** Запущенные Docker-контейнеры с опубликованными портами (best-effort). */
+  listContainers(): Promise<ContainerInfo[]>;
+  /** Остановить контейнер по id. */
+  stopContainer(id: string): Promise<void>;
 }
 
 /** DI-токен шва. В проде — `TauriPortBridge`, в тестах — `FakePortBridge`. */

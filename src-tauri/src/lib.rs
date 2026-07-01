@@ -4,6 +4,7 @@
 //! далее только показывается/прячется (show/hide), чтобы открываться мгновенно.
 
 mod details;
+mod docker;
 mod killer;
 mod ports;
 
@@ -105,7 +106,9 @@ pub fn run() {
         .invoke_handler(tauri::generate_handler![
             ports::list_ports,
             killer::kill_process,
-            details::get_port_details
+            details::get_port_details,
+            docker::list_containers,
+            docker::stop_container
         ])
         .setup(|app| {
             // Автообновление подключаем только на десктопе (плагина нет на mobile).

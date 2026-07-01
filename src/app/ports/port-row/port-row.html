@@ -1,54 +1,117 @@
-<div
-  class="row"
-  [class.row--udp]="row().port.protocol === 'udp'"
-  role="button"
-  tabindex="0"
-  [attr.aria-label]="'Детали порта ' + row().port.port"
-  (click)="select.emit()"
-  (keydown.enter)="select.emit()"
-  (keydown.space)="$event.preventDefault(); select.emit()"
->
-  <span class="dot" [attr.aria-hidden]="true"></span>
+@if (row().container; as container) {
+  @if (confirming()) {
+    <div class="row row--confirm">
+      <span class="confirm-text">
+        Остановить {{ container.composeService ?? container.name }}?
+      </span>
+      <span class="confirm-actions">
+        <button type="button" class="confirm-btn" (click)="cancelStop()">
+          Отмена
+        </button>
+        <button
+          type="button"
+          class="confirm-btn confirm-btn--danger"
+          (click)="confirmStop()"
+        >
+          Остановить
+        </button>
+      </span>
+    </div>
+  } @else {
+    <div class="row row--docker" [class.row--udp]="row().port.protocol === 'udp'">
+      <span class="dot" [attr.aria-hidden]="true"></span>
 
-  <span class="port">:{{ row().port.port }}</span>
+      <span class="port">:{{ row().port.port }}</span>
 
-  <span class="proc" [title]="row().port.processName ?? ''">
-    @if (row().port.processName) {
-      {{ row().port.processName }}
-    } @else {
-      <span class="proc--none">—</span>
-    }
-  </span>
+      <span class="proc proc--docker">
+        <span class="whale" [attr.aria-hidden]="true">🐳</span>
+        <span class="cname">{{
+          container.composeService ?? container.name
+        }}</span>
+        <span class="image">{{ container.image }}</span>
+      </span>
 
-  <span class="meta">
-    @if (row().port.pid !== null) {
-      <span class="pid">#{{ row().port.pid }}</span>
-    }
-    <span class="proto">{{ row().port.protocol }}</span>
-  </span>
+      <span class="meta">
+        <span class="proto">{{ row().port.protocol }}</span>
+      </span>
 
-  <span class="actions">
-    @if (row().canOpen) {
-      <button
-        type="button"
-        class="act act--open"
-        (click)="$event.stopPropagation(); open.emit()"
-        [title]="'Открыть localhost:' + row().port.port"
-      >
-        ↗
-      </button>
-    }
-    @if (row().killable) {
-      <button
-        type="button"
-        class="act act--kill"
-        (click)="$event.stopPropagation(); kill.emit()"
-        title="Завершить процесс"
-      >
-        ✕
-      </button>
-    }
-  </span>
+      <span class="actions">
+        @if (row().canOpen) {
+          <button
+            type="button"
+            class="act act--open"
+            (click)="open.emit()"
+            [title]="'Открыть localhost:' + row().port.port"
+          >
+            ↗
+          </button>
+        }
+        <button
+          type="button"
+          class="act act--stop"
+          (click)="askStop()"
+          [title]="'Остановить контейнер ' + container.name"
+        >
+          ⏹
+        </button>
+      </span>
 
-  <span class="chev" [attr.aria-hidden]="true">›</span>
-</div>
+      <span class="chev chev--empty" [attr.aria-hidden]="true"></span>
+    </div>
+  }
+} @else {
+  <div
+    class="row"
+    [class.row--udp]="row().port.protocol === 'udp'"
+    role="button"
+    tabindex="0"
+    [attr.aria-label]="'Детали порта ' + row().port.port"
+    (click)="select.emit()"
+    (keydown.enter)="select.emit()"
+    (keydown.space)="$event.preventDefault(); select.emit()"
+  >
+    <span class="dot" [attr.aria-hidden]="true"></span>
+
+    <span class="port">:{{ row().port.port }}</span>
+
+    <span class="proc" [title]="row().port.processName ?? ''">
+      @if (row().port.processName) {
+        {{ row().port.processName }}
+      } @else {
+        <span class="proc--none">—</span>
+      }
+    </span>
+
+    <span class="meta">
+      @if (row().port.pid !== null) {
+        <span class="pid">#{{ row().port.pid }}</span>
+      }
+      <span class="proto">{{ row().port.protocol }}</span>
+    </span>
+
+    <span class="actions">
+      @if (row().canOpen) {
+        <button
+          type="button"
+          class="act act--open"
+          (click)="$event.stopPropagation(); open.emit()"
+          [title]="'Открыть localhost:' + row().port.port"
+        >
+          ↗
+        </button>
+      }
+      @if (row().killable) {
+        <button
+          type="button"
+          class="act act--kill"
+          (click)="$event.stopPropagation(); kill.emit()"
+          title="Завершить процесс"
+        >
+          ✕
+        </button>
+      }
+    </span>
+
+    <span class="chev" [attr.aria-hidden]="true">›</span>
+  </div>
+}
