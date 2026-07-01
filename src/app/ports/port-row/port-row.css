@@ -11,6 +11,15 @@
 .row:hover {
   background: var(--row-hover);
 }
+/* Клавиатурный фокус (roving) — отдельный от hover индикатор. */
+.row:focus-visible {
+  outline: 2px solid var(--signal);
+  outline-offset: -2px;
+  background: var(--row-hover);
+}
+.row:focus-visible .act {
+  opacity: 1;
+}
 
 .dot {
   width: 7px;

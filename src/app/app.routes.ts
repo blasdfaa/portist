@@ -1,14 +1,14 @@
 import { inject } from "@angular/core";
 import { type CanActivateFn, Router, type Routes } from "@angular/router";
 
-import { DetailSession } from "./detail/detail-session";
+import { DetailSessionService } from "./detail/detail-session-service";
 import { PortDetail } from "./detail/port-detail/port-detail";
 import { PortsList } from "./ports/ports-list/ports-list";
 import { Settings } from "./settings/settings";
 
 /** Карточку открываем только при выбранном порте, иначе — назад к списку. */
 const detailGuard: CanActivateFn = () =>
-  inject(DetailSession).selected() ? true : inject(Router).createUrlTree(["/"]);
+  inject(DetailSessionService).selected() ? true : inject(Router).createUrlTree(["/"]);
 
 /**
  * Экраны приложения. `data.depth` задаёт глубину — из неё роутер выводит

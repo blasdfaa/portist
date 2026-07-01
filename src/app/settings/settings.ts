@@ -7,9 +7,10 @@ import {
 } from "@angular/core";
 import { Router } from "@angular/router";
 
-import { ShellApi } from "../core/shell-api";
+import { ShellApiService } from "../core/shell-api-service";
+import { PreferencesService } from "./preferences-service";
 import { SettingRow } from "./setting-row/setting-row";
-import { Theme, type ThemeMode } from "./theme";
+import { ThemeService, type ThemeMode } from "./theme-service";
 
 /** Опция переключателя темы: значение, подпись (a11y/тултип) и глиф. */
 interface ThemeOption {
@@ -27,9 +28,10 @@ interface ThemeOption {
   styleUrl: "./settings.css",
 })
 export class Settings {
-  private readonly shell = inject(ShellApi);
+  private readonly shell = inject(ShellApiService);
   private readonly router = inject(Router);
-  protected readonly theme = inject(Theme);
+  protected readonly theme = inject(ThemeService);
+  protected readonly prefs = inject(PreferencesService);
 
   /** Версия приложения; пусто, пока не загрузилась. */
   protected readonly version = signal("");

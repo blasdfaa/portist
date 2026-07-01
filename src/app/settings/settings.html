@@ -30,6 +30,20 @@
       </div>
     </app-setting-row>
 
+    <app-setting-row label="Скрыть системные порты">
+      <button
+        type="button"
+        class="toggle"
+        role="switch"
+        [class.toggle--on]="prefs.hideSystemPorts()"
+        [attr.aria-checked]="prefs.hideSystemPorts()"
+        aria-label="Скрыть системные порты"
+        (click)="prefs.toggleHideSystemPorts()"
+      >
+        <span class="toggle-knob" [attr.aria-hidden]="true"></span>
+      </button>
+    </app-setting-row>
+
     <app-setting-row label="Версия">
       @if (version()) {
         <span class="version">v{{ version() }}</span>

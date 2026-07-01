@@ -79,7 +79,7 @@
       </button>
     </div>
   } @else {
-    <div class="list">
+    <div class="list" (keydown)="onListKeydown($event)" (focusin)="onListFocusin($event)">
       @for (group of inventory.groups(); track group.id) {
         <section class="group">
           <div class="group-head">
@@ -113,6 +113,7 @@
                   ) {
                     <app-port-row
                       [row]="row"
+                      [active]="isActive(row)"
                       (select)="openDetail(row)"
                       (open)="open(row.port)"
                       (kill)="kill(row.port)"
@@ -126,6 +127,7 @@
             @for (row of group.rows; track row.port.protocol + row.port.port) {
               <app-port-row
                 [row]="row"
+                [active]="isActive(row)"
                 (select)="openDetail(row)"
                 (open)="open(row.port)"
                 (kill)="kill(row.port)"

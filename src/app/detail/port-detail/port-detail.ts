@@ -8,9 +8,9 @@ import {
 } from "@angular/core";
 import { Router } from "@angular/router";
 
-import { ShellApi } from "../../core/shell-api";
-import { PortInventory } from "../../ports/port-inventory";
-import { DetailSession } from "../detail-session";
+import { ShellApiService } from "../../core/shell-api-service";
+import { PortInventoryService } from "../../ports/port-inventory-service";
+import { DetailSessionService } from "../detail-session-service";
 import {
   PORT_DETAIL_FIELDS,
   type PortDetailContext,
@@ -24,9 +24,9 @@ import {
   styleUrl: "./port-detail.css",
 })
 export class PortDetail implements OnDestroy {
-  private readonly shell = inject(ShellApi);
-  private readonly inventory = inject(PortInventory);
-  private readonly session = inject(DetailSession);
+  private readonly shell = inject(ShellApiService);
+  private readonly inventory = inject(PortInventoryService);
+  private readonly session = inject(DetailSessionService);
   private readonly router = inject(Router);
 
   /** Раскрытая строка. Маршрут защищён guard'ом, поэтому здесь всегда задана. */
@@ -86,7 +86,7 @@ export class PortDetail implements OnDestroy {
     void this.router.navigate(["/"]);
   }
 
-  /** Открыть localhost:PORT в браузере (политику отказа держит ShellApi). */
+  /** Открыть localhost:PORT в браузере (политику отказа держит ShellApiService). */
   open(): void {
     void this.shell.openInBrowser(this.port().port);
   }

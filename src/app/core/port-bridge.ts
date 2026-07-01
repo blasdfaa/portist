@@ -9,7 +9,7 @@ import type { ContainerInfo, PortDetails, PortInfo } from "./models";
  * шов настоящим.
  *
  * Краевые shell/window-эффекты (открыть в браузере, буфер, событие поповера)
- * сюда НЕ входят — они живут в `ShellApi`, их не подменяют в тестах.
+ * сюда НЕ входят — они живут в `ShellApiService`, их не подменяют в тестах.
  */
 export interface PortBridge {
   /** Список слушающих портов. */

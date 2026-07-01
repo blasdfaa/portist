@@ -2,8 +2,9 @@ import { Injectable, computed, inject, signal } from "@angular/core";
 
 import type { ContainerInfo, PortInfo } from "../core/models";
 import { PORT_BRIDGE } from "../core/port-bridge";
+import { PreferencesService } from "../settings/preferences-service";
 import { indexContainersByPort, portKey } from "./grouped-port";
-import { PortGrouper } from "./port-grouper";
+import { PortGrouperService } from "./port-grouper-service";
 
 /**
  * Состояние списка портов: загрузка, поиск-фильтр, группировка, kill/stop.
@@ -11,9 +12,10 @@ import { PortGrouper } from "./port-grouper";
  * сигналы; DOM и рантайм Tauri не нужны (зависит от {@link PORT_BRIDGE}).
  */
 @Injectable({ providedIn: "root" })
-export class PortInventory {
+export class PortInventoryService {
   private readonly bridge = inject(PORT_BRIDGE);
-  private readonly grouper = inject(PortGrouper);
+  private readonly grouper = inject(PortGrouperService);
+  private readonly prefs = inject(PreferencesService);
 
   private readonly ports = signal<PortInfo[]>([]);
   private readonly containers = signal<ContainerInfo[]>([]);
@@ -29,12 +31,28 @@ export class PortInventory {
   );
 
   /**
+   * Порты к показу: при включённом «скрыть системные» жёстко исключаем
+   * системные (не-docker) порты — до счётчика, поиска и группировки. Docker-порты
+   * под правило не подпадают (уходят в группу Docker раньше правил).
+   */
+  private readonly visiblePorts = computed(() => {
+    const ports = this.ports();
+    if (!this.prefs.hideSystemPorts()) return ports;
+    const byPort = this.containerByPort();
+    return ports.filter(
+      (p) =>
+        byPort.has(portKey(p.protocol, p.port)) ||
+        !this.grouper.isSystemPort(p.port),
+    );
+  });
+
+  /**
    * Порты после поиска: по номеру, имени процесса или полям контейнера
    * (имя/образ/compose-проект/сервис).
    */
   private readonly filtered = computed(() => {
     const q = this._query().trim().toLowerCase();
-    const ports = this.ports();
+    const ports = this.visiblePorts();
     if (!q) return ports;
     const byPort = this.containerByPort();
     return ports.filter((p) => {
@@ -51,7 +69,7 @@ export class PortInventory {
   readonly groups = computed(() =>
     this.grouper.group(this.filtered(), this.containers()),
   );
-  readonly total = computed(() => this.ports().length);
+  readonly total = computed(() => this.visiblePorts().length);
   readonly filteredTotal = computed(() => this.filtered().length);
 
   /** id свёрнутых docker-проектов. По умолчанию все раскрыты (пустое). */

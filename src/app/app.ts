@@ -6,10 +6,10 @@ import {
 } from "@angular/core";
 import { Router, RouterOutlet } from "@angular/router";
 
-import { ShellApi } from "./core/shell-api";
-import { PortInventory } from "./ports/port-inventory";
-import { Theme } from "./settings/theme";
-import { AppUpdater } from "./update/app-updater";
+import { ShellApiService } from "./core/shell-api-service";
+import { PortInventoryService } from "./ports/port-inventory-service";
+import { ThemeService } from "./settings/theme-service";
+import { AppUpdaterService } from "./update/app-updater-service";
 import { UpdateBanner } from "./update/update-banner/update-banner";
 
 @Component({
@@ -20,13 +20,13 @@ import { UpdateBanner } from "./update/update-banner/update-banner";
   styleUrl: "./app.css",
 })
 export class App implements OnInit {
-  private readonly shell = inject(ShellApi);
-  private readonly updater = inject(AppUpdater);
+  private readonly shell = inject(ShellApiService);
+  private readonly updater = inject(AppUpdaterService);
   // Инъекция в корне инициализирует сервис темы на старте: его effect
   // проставляет data-theme до отрисовки экранов.
-  private readonly theme = inject(Theme);
+  private readonly theme = inject(ThemeService);
   private readonly router = inject(Router);
-  private readonly inventory = inject(PortInventory);
+  private readonly inventory = inject(PortInventoryService);
 
   async ngOnInit(): Promise<void> {
     await this.inventory.refresh();

@@ -17,11 +17,11 @@ export type UpdateState =
 /**
  * Edge-эффект ОС: проверка/скачивание/установка обновления через
  * `tauri-plugin-updater` и перезапуск через `tauri-plugin-process`.
- * Как и `ShellApi`, оборачивает плагины напрямую — интерфейса/фейка нет.
+ * Как и `ShellApiService`, оборачивает плагины напрямую — интерфейса/фейка нет.
  * Но владеет состоянием, которое показывает баннер, поэтому это signal-store.
  */
 @Injectable({ providedIn: "root" })
-export class AppUpdater {
+export class AppUpdaterService {
   private readonly _state = signal<UpdateState>({ kind: "idle" });
   /** Текущее положение машины состояний для UI. */
   readonly state = this._state.asReadonly();

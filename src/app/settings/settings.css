@@ -103,6 +103,47 @@
   }
 }
 
+/* Pill-тумблер для булевых настроек */
+.toggle {
+  position: relative;
+  width: 40px;
+  height: 24px;
+  padding: 0;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  background: var(--panel-hi);
+  cursor: pointer;
+  transition:
+    background 0.15s ease,
+    border-color 0.15s ease;
+}
+.toggle--on {
+  background: var(--signal-dim);
+  border-color: var(--signal-dim);
+}
+.toggle-knob {
+  position: absolute;
+  top: 2px;
+  left: 2px;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: var(--muted);
+  transition:
+    transform 0.15s ease,
+    background 0.15s ease;
+}
+.toggle--on .toggle-knob {
+  transform: translateX(16px);
+  background: var(--signal);
+}
+@media (prefers-reduced-motion: reduce) {
+  .toggle,
+  .toggle-knob {
+    transition: none;
+  }
+}
+
 /* Номер версии — статичное значение справа в строке */
 .version {
   font-size: 12px;

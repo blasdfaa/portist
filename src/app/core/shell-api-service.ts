@@ -10,7 +10,7 @@ import { openUrl } from "@tauri-apps/plugin-opener";
  * в тестах не подменяется (фейкать эти эффекты нечего проверять).
  */
 @Injectable({ providedIn: "root" })
-export class ShellApi {
+export class ShellApiService {
   /**
    * Открыть localhost:PORT в браузере по умолчанию. Fire-and-forget: провал
    * (нет браузера, отказ ОС) логируется и глотается здесь, а не у каждого

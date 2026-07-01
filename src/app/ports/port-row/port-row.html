@@ -18,7 +18,12 @@
       </span>
     </div>
   } @else {
-    <div class="row row--docker" [class.row--udp]="row().port.protocol === 'udp'">
+    <div
+      class="row row--docker"
+      [class.row--udp]="row().port.protocol === 'udp'"
+      [attr.tabindex]="active() ? 0 : -1"
+      [attr.data-key]="row().port.protocol + row().port.port"
+    >
       <span class="dot" [attr.aria-hidden]="true"></span>
 
       <span class="port">:{{ row().port.port }}</span>
@@ -64,7 +69,8 @@
     class="row"
     [class.row--udp]="row().port.protocol === 'udp'"
     role="button"
-    tabindex="0"
+    [attr.tabindex]="active() ? 0 : -1"
+    [attr.data-key]="row().port.protocol + row().port.port"
     [attr.aria-label]="'Детали порта ' + row().port.port"
     (click)="select.emit()"
     (keydown.enter)="select.emit()"

@@ -16,7 +16,7 @@ import { PORT_BRIDGE } from "../core/port-bridge";
  * карточка» — на это опираются guard маршрута и `selected()!` в карточке.
  */
 @Injectable({ providedIn: "root" })
-export class DetailSession {
+export class DetailSessionService {
   private readonly bridge = inject(PORT_BRIDGE);
 
   private readonly _selected = signal<GroupedPort | null>(null);

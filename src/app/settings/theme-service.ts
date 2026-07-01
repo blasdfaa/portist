@@ -12,7 +12,7 @@ const MODES: ThemeMode[] = ["auto", "light", "dark"];
  * живьём без слушателей в коде.
  */
 @Injectable({ providedIn: "root" })
-export class Theme {
+export class ThemeService {
   private readonly _mode = signal<ThemeMode>(this.read());
   /** Текущий режим темы для UI настроек. */
   readonly mode = this._mode.asReadonly();

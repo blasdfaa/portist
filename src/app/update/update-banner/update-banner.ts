@@ -5,11 +5,11 @@ import {
   inject,
 } from "@angular/core";
 
-import { AppUpdater } from "../app-updater";
+import { AppUpdaterService } from "../app-updater-service";
 
 /**
  * Тонкая полоска поверх списка портов: показывает статус автообновления и
- * даёт кнопки «Обновить» / «Повторить». Логику держит AppUpdater — здесь
+ * даёт кнопки «Обновить» / «Повторить». Логику держит AppUpdaterService — здесь
  * только представление. В состоянии `idle` не рисует ничего.
  */
 @Component({
@@ -19,7 +19,7 @@ import { AppUpdater } from "../app-updater";
   styleUrl: "./update-banner.css",
 })
 export class UpdateBanner {
-  protected readonly updater = inject(AppUpdater);
+  protected readonly updater = inject(AppUpdaterService);
 
   /** Прогресс загрузки в процентах для индикатора. */
   protected readonly percent = computed(() => {

@@ -18,6 +18,8 @@ import type { GroupedPort } from "../grouped-port";
 export class PortRow {
   /** Обогащённая строка списка — все производные факты уже посчитаны. */
   readonly row = input.required<GroupedPort>();
+  /** Активная строка roving-навигации: получает tabindex=0 (остальные -1). */
+  readonly active = input<boolean>(false);
   readonly select = output<void>();
   readonly open = output<void>();
   readonly kill = output<void>();

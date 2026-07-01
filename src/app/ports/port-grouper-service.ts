@@ -28,7 +28,7 @@ interface Project {
  * внутри «Docker» — сначала compose, затем одиночки, оба по алфавиту.
  */
 @Injectable({ providedIn: "root" })
-export class PortGrouper {
+export class PortGrouperService {
   private readonly rules = [...inject(PORT_GROUP_RULES)].sort(
     (a, b) => a.order - b.order,
   );
@@ -128,5 +128,13 @@ export class PortGrouper {
 
   private matchRule(port: number): GroupRule | undefined {
     return this.rules.find((rule) => rule.match(port));
+  }
+
+  /**
+   * Попадает ли (не-docker) порт в системную группу — для тумблера «скрыть
+   * системные». Политика («что системное») остаётся в правилах, не дублируется.
+   */
+  isSystemPort(port: number): boolean {
+    return this.matchRule(port)?.id === "system";
   }
 }
