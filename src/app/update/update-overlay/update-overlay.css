@@ -1,0 +1,50 @@
+:host {
+  display: contents;
+}
+
+/* Слой поверх всей оболочки; перехватывает клики (установку нельзя отменить).
+   Абсолютный внутри .shell (position: relative) — скругление обрезает углы. */
+.ovl {
+  position: absolute;
+  inset: 0;
+  z-index: 100;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  padding: 24px;
+  text-align: center;
+  background: color-mix(in srgb, var(--panel) 88%, transparent);
+  backdrop-filter: blur(2px);
+}
+
+.ovl-spin {
+  font-size: 34px;
+  line-height: 1;
+  color: var(--signal);
+  animation: ovl-rotate 1s linear infinite;
+}
+@keyframes ovl-rotate {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.ovl-text {
+  color: var(--text);
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.ovl-pct {
+  color: var(--muted);
+  font-size: 12px;
+  font-variant-numeric: tabular-nums;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ovl-spin {
+    animation: none;
+  }
+}

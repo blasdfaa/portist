@@ -1,5 +1,6 @@
 import {
   ApplicationConfig,
+  isDevMode,
   provideBrowserGlobalErrorListeners,
   provideZonelessChangeDetection,
 } from "@angular/core";
@@ -10,11 +11,13 @@ import {
   withHashLocation,
   withViewTransitions,
 } from "@angular/router";
+import { provideTransloco } from "@jsverse/transloco";
 
 import { routes } from "./app.routes";
 import { PORT_BRIDGE } from "./core/port-bridge";
 import { TauriPortBridge } from "./core/tauri-port-bridge";
-import { BUILTIN_GROUP_RULES } from "./ports/builtin-rules";
+import { AVAILABLE_LANGS, FALLBACK_LANG, resolveInitialLang } from "./i18n/lang";
+import { InlineTranslocoLoader } from "./i18n/inline-loader";
 
 /** Глубина листового маршрута из data.depth. */
 function routeDepth(snapshot: ActivatedRouteSnapshot): number {
@@ -58,7 +61,19 @@ export const appConfig: ApplicationConfig = {
     ),
     // Прод-адаптер шва к бэкенду. В тестах — useValue: new FakePortBridge().
     { provide: PORT_BRIDGE, useClass: TauriPortBridge },
-    // Расширяемый реестр правил группировки портов.
-    ...BUILTIN_GROUP_RULES,
+    // Локализация: каталоги в бандле (инлайн-лоадер), живой свитч языка.
+    // defaultLang резолвится синхронно (localStorage → система → фолбек), чтобы
+    // первый рендер сразу был на нужном языке.
+    provideTransloco({
+      config: {
+        availableLangs: AVAILABLE_LANGS,
+        defaultLang: resolveInitialLang(),
+        fallbackLang: FALLBACK_LANG,
+        reRenderOnLangChange: true,
+        prodMode: !isDevMode(),
+        missingHandler: { logMissingKey: false },
+      },
+      loader: InlineTranslocoLoader,
+    }),
   ],
 };

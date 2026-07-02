@@ -1,4 +1,5 @@
 import type { PortDetails, PortInfo } from "../core/models";
+import type { Lang } from "../i18n/lang";
 import { formatBytes, formatDateTime, formatDuration } from "./formatters";
 
 /** Данные, из которых поле вычисляет своё значение. */
@@ -10,11 +11,16 @@ export interface PortDetailContext {
   serviceName: string | null;
   /** Похоже ли, что порт говорит по HTTP (есть смысл показывать URL). */
   canOpen: boolean;
+  /** Перевод ключа каталога — для значений-«хрома» (например, exposure). */
+  t: (key: string) => string;
+  /** Активный язык — для локали форматтеров (байты/длительность/дата). */
+  lang: Lang;
 }
 
 /** Описание одной строки в карточке порта. */
 export interface DetailField {
   id: string;
+  /** Ключ каталога переводов для подписи поля (переводится в компоненте). */
   label: string;
   /** Значение для показа; верните null, чтобы скрыть поле целиком. */
   value: (ctx: PortDetailContext) => string | null;
@@ -35,36 +41,38 @@ export interface DetailField {
 export const PORT_DETAIL_FIELDS: DetailField[] = [
   {
     id: "service",
-    label: "Сервис",
+    label: "detail.fields.service",
     value: (c) => c.serviceName,
   },
   {
     id: "url",
-    label: "URL",
+    label: "detail.fields.url",
     value: (c) => (c.canOpen ? `localhost:${c.port.port}` : null),
     copy: (c) => (c.canOpen ? `http://localhost:${c.port.port}` : null),
   },
   {
     id: "address",
-    label: "Адрес",
+    label: "detail.fields.address",
     value: (c) => c.port.address,
   },
   {
     id: "protocol",
-    label: "Протокол",
+    label: "detail.fields.protocol",
     value: (c) => c.port.protocol.toUpperCase(),
   },
   {
     id: "exposure",
-    label: "Доступ",
+    label: "detail.fields.exposure",
     value: (c) =>
-      c.port.address === "0.0.0.0" || c.port.address === "::"
-        ? "виден в сети"
-        : "только localhost",
+      c.t(
+        c.port.address === "0.0.0.0" || c.port.address === "::"
+          ? "detail.exposure.network"
+          : "detail.exposure.local",
+      ),
   },
   {
     id: "pid",
-    label: "PID",
+    label: "detail.fields.pid",
     value: (c) =>
       c.details?.pid != null
         ? String(c.details.pid)
@@ -74,22 +82,22 @@ export const PORT_DETAIL_FIELDS: DetailField[] = [
   },
   {
     id: "project",
-    label: "Проект",
+    label: "detail.fields.project",
     value: (c) => c.details?.project ?? null,
   },
   {
     id: "user",
-    label: "Владелец",
+    label: "detail.fields.user",
     value: (c) => c.details?.user ?? null,
   },
   {
     id: "status",
-    label: "Статус",
+    label: "detail.fields.status",
     value: (c) => c.details?.status ?? null,
   },
   {
     id: "cpu",
-    label: "CPU",
+    label: "detail.fields.cpu",
     value: (c) =>
       c.details && c.details.cpuUsage > 0
         ? `${c.details.cpuUsage.toFixed(1)} %`
@@ -97,22 +105,22 @@ export const PORT_DETAIL_FIELDS: DetailField[] = [
   },
   {
     id: "memory",
-    label: "Память",
-    value: (c) => formatBytes(c.details?.memory),
+    label: "detail.fields.memory",
+    value: (c) => formatBytes(c.details?.memory, c.lang),
   },
   {
     id: "uptime",
-    label: "Работает",
-    value: (c) => formatDuration(c.details?.runTime),
+    label: "detail.fields.uptime",
+    value: (c) => formatDuration(c.details?.runTime, c.lang),
   },
   {
     id: "started",
-    label: "Запущен",
-    value: (c) => formatDateTime(c.details?.startTime),
+    label: "detail.fields.started",
+    value: (c) => formatDateTime(c.details?.startTime, c.lang),
   },
   {
     id: "parent",
-    label: "Родитель",
+    label: "detail.fields.parent",
     value: (c) => {
       const d = c.details;
       if (!d?.parentPid) return null;
@@ -121,7 +129,7 @@ export const PORT_DETAIL_FIELDS: DetailField[] = [
   },
   {
     id: "killcmd",
-    label: "Команда kill",
+    label: "detail.fields.killcmd",
     value: (c) => {
       const pid = c.details?.pid ?? c.port.pid;
       return pid != null ? `kill -9 ${pid}` : null;
@@ -129,19 +137,19 @@ export const PORT_DETAIL_FIELDS: DetailField[] = [
   },
   {
     id: "exec",
-    label: "Путь",
+    label: "detail.fields.exec",
     wide: true,
     value: (c) => c.details?.execPath ?? null,
   },
   {
     id: "cmd",
-    label: "Командная строка",
+    label: "detail.fields.cmd",
     wide: true,
     value: (c) => (c.details?.cmd?.length ? c.details.cmd.join(" ") : null),
   },
   {
     id: "cwd",
-    label: "Рабочая папка",
+    label: "detail.fields.cwd",
     wide: true,
     value: (c) => c.details?.cwd ?? null,
   },

@@ -4,6 +4,8 @@
     @if (description()) {
       <p class="desc">{{ description() }}</p>
     }
+    <!-- Необязательный интерактивный слот под названием (напр. ручная проверка). -->
+    <ng-content select="[desc]" />
   </div>
   <div class="control">
     <ng-content />

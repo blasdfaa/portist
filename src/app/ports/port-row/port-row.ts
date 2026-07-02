@@ -5,12 +5,14 @@ import {
   output,
   signal,
 } from "@angular/core";
+import { TranslocoPipe } from "@jsverse/transloco";
 
 import type { GroupedPort } from "../grouped-port";
 
 /** Одна «терминальная запись» порта: статус, :порт, процесс, PID и действия. */
 @Component({
   selector: "app-port-row",
+  imports: [TranslocoPipe],
   changeDetection: ChangeDetectionStrategy.OnPush,
   templateUrl: "./port-row.html",
   styleUrl: "./port-row.css",

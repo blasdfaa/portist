@@ -1,0 +1,9 @@
+@if (updater.state(); as state) {
+  @if (state.kind === "downloading") {
+    <div class="ovl" role="alert" aria-live="assertive" aria-busy="true">
+      <span class="ovl-spin" [attr.aria-hidden]="true">⟳</span>
+      <span class="ovl-text">{{ "update.updating" | transloco }}</span>
+      <span class="ovl-pct">{{ percent() }}%</span>
+    </div>
+  }
+}

@@ -1,6 +1,11 @@
 <div class="detail">
   <header class="head">
-    <button type="button" class="back" (click)="back()" title="Назад">
+    <button
+      type="button"
+      class="back"
+      (click)="back()"
+      [title]="'common.back' | transloco"
+    >
       ‹
     </button>
     <span class="dot" [class.dot--udp]="port().protocol === 'udp'"></span>
@@ -9,7 +14,7 @@
       class="title"
       (click)="copy('port', String(port().port))"
       [class.copied]="copiedId() === 'port'"
-      title="Скопировать порт"
+      [title]="'detail.copyPort' | transloco"
     >
       :{{ port().port }}
     </button>
@@ -17,7 +22,7 @@
       @if (port().processName) {
         {{ port().processName }}
       } @else {
-        <span class="dash">процесс неизвестен</span>
+        <span class="dash">{{ "detail.unknownProcess" | transloco }}</span>
       }
     </span>
     <span class="head-actions">
@@ -26,7 +31,7 @@
           type="button"
           class="act act--open"
           (click)="open()"
-          [title]="'Открыть localhost:' + port().port"
+          [title]="'ports.openLocalhost' | transloco: { port: port().port }"
         >
           ↗
         </button>
@@ -36,7 +41,7 @@
           type="button"
           class="act act--kill"
           (click)="kill()"
-          title="Завершить процесс"
+          [title]="'ports.killProcess' | transloco"
         >
           ✕
         </button>
@@ -48,7 +53,7 @@
     @if (error()) {
       <div class="note note--error">{{ error() }}</div>
     } @else if (loading()) {
-      <div class="note">Загрузка деталей…</div>
+      <div class="note">{{ "detail.loading" | transloco }}</div>
     }
 
     <dl class="fields">
@@ -61,11 +66,13 @@
               class="val"
               [class.copied]="copiedId() === item.id"
               (click)="copy(item.id, item.copyValue)"
-              [attr.aria-label]="'Скопировать: ' + item.label"
+              [attr.aria-label]="'detail.copyField' | transloco: { label: item.label }"
             >
               <span class="val-text">{{ item.value }}</span>
               <span class="val-hint">{{
-                copiedId() === item.id ? "скопировано" : "копировать"
+                copiedId() === item.id
+                  ? ("detail.copied" | transloco)
+                  : ("detail.copy" | transloco)
               }}</span>
             </button>
           </dd>
@@ -80,7 +87,7 @@
       visibleFields().length <= 5
     ) {
       <div class="note note--muted">
-        Детали процесса недоступны — нужен запуск с повышенными правами.
+        {{ "detail.noDetails" | transloco }}
       </div>
     }
   </div>

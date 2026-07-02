@@ -12,7 +12,7 @@
       class="reload"
       [class.reload--busy]="inventory.loading()"
       (click)="inventory.refresh()"
-      title="Обновить"
+      [title]="'ports.refresh' | transloco"
     >
       ⟳
     </button>
@@ -20,7 +20,7 @@
       type="button"
       class="gear"
       (click)="openSettings()"
-      title="Настройки"
+      [title]="'ports.openSettings' | transloco"
     >
       ⚙
     </button>
@@ -33,7 +33,7 @@
     <input
       class="search-input"
       type="text"
-      placeholder="Порт или процесс…"
+      [placeholder]="'ports.searchPlaceholder' | transloco"
       [value]="inventory.query()"
       (input)="onSearch($event)"
     />
@@ -42,7 +42,7 @@
         type="button"
         class="search-clear"
         (click)="inventory.setQuery('')"
-        title="Очистить"
+        [title]="'ports.clearSearch' | transloco"
       >
         ✕
       </button>
@@ -54,28 +54,32 @@
   @if (inventory.error()) {
     <div class="state">
       <div class="state-title state-title--error">
-        Не удалось получить порты
+        {{ "ports.loadError" | transloco }}
       </div>
       <div class="state-sub">{{ inventory.error() }}</div>
-      <button type="button" class="ghost" (click)="inventory.refresh()">Повторить</button>
+      <button type="button" class="ghost" (click)="inventory.refresh()">
+        {{ "common.retry" | transloco }}
+      </button>
     </div>
   } @else if (inventory.loading() && inventory.total() === 0) {
     <div class="state">
-      <div class="state-sub">Сканирование сокетов…</div>
+      <div class="state-sub">{{ "ports.scanning" | transloco }}</div>
     </div>
   } @else if (inventory.total() === 0) {
     <div class="state">
       <div class="state-glyph">∅</div>
-      <div class="state-title">Слушающих портов нет</div>
-      <div class="state-sub">Запустите локальный сервер — он появится здесь.</div>
+      <div class="state-title">{{ "ports.emptyTitle" | transloco }}</div>
+      <div class="state-sub">{{ "ports.emptyHint" | transloco }}</div>
     </div>
   } @else if (inventory.filteredTotal() === 0) {
     <div class="state">
       <div class="state-glyph">⌕</div>
-      <div class="state-title">Ничего не найдено</div>
-      <div class="state-sub">Нет портов по запросу «{{ inventory.query() }}».</div>
+      <div class="state-title">{{ "ports.noMatchTitle" | transloco }}</div>
+      <div class="state-sub">
+        {{ "ports.noMatchHint" | transloco: { query: inventory.query() } }}
+      </div>
       <button type="button" class="ghost" (click)="inventory.setQuery('')">
-        Сбросить поиск
+        {{ "ports.resetSearch" | transloco }}
       </button>
     </div>
   } @else {
@@ -83,7 +87,13 @@
       @for (group of inventory.groups(); track group.id) {
         <section class="group">
           <div class="group-head">
-            <span class="group-label">{{ group.label }}</span>
+            <span class="group-label">
+              @if (group.translate) {
+                {{ group.label | transloco }}
+              } @else {
+                {{ group.label }}
+              }
+            </span>
             <span class="group-rule"></span>
             <span class="group-count">{{ groupSize(group) }}</span>
           </div>

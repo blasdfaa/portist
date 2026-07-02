@@ -1,6 +1,8 @@
-import { Injectable, signal } from "@angular/core";
+import { Injectable, inject, signal } from "@angular/core";
 import { relaunch } from "@tauri-apps/plugin-process";
 import { check, type Update } from "@tauri-apps/plugin-updater";
+
+import { PreferencesService } from "../settings/preferences-service";
 
 /**
  * Состояние процесса автообновления. Узкая машина состояний для баннера:
@@ -22,6 +24,8 @@ export type UpdateState =
  */
 @Injectable({ providedIn: "root" })
 export class AppUpdaterService {
+  private readonly prefs = inject(PreferencesService);
+
   private readonly _state = signal<UpdateState>({ kind: "idle" });
   /** Текущее положение машины состояний для UI. */
   readonly state = this._state.asReadonly();
@@ -30,17 +34,64 @@ export class AppUpdaterService {
   private pending: Update | null = null;
 
   /**
-   * Спросить CDN о новой версии. `silent` — для авто-проверки при старте:
-   * «всё актуально» и ошибки сети не показываем, баннер молчит.
+   * Найденный на старте апдейт ждёт авто-установки (автообновление ВКЛ).
+   * Ставим не сразу, а при первом показе поповера — иначе оверлей «приложение
+   * обновляется» проходил бы в скрытом окне и был бы не виден.
    */
-  async check(silent = false): Promise<void> {
+  private armed = false;
+
+  /**
+   * Тихая проверка при старте. Если апдейт найден и автообновление ВКЛ —
+   * запоминаем его к авто-установке ({@link runArmedInstall}), баннер не трогаем.
+   * Если ВЫКЛ — показываем баннер «доступно обновление» (ручная установка).
+   * «Всё актуально» и ошибки сети остаются немыми.
+   */
+  async checkOnStartup(): Promise<void> {
+    if (this._state().kind === "downloading") return;
+    try {
+      const update = await check();
+      if (!update) {
+        this.pending = null;
+        return;
+      }
+      this.pending = update;
+      if (this.prefs.autoUpdate()) {
+        this.armed = true;
+      } else {
+        this._state.set({
+          kind: "available",
+          version: update.version,
+          notes: update.body ?? "",
+        });
+      }
+    } catch {
+      this.pending = null;
+    }
+  }
+
+  /**
+   * Запустить отложенную авто-установку (зовётся при показе поповера). No-op,
+   * если ничего не «взведено». Сбрасываем флаг до install(), чтобы повторные
+   * показы поповера не перезапускали установку.
+   */
+  runArmedInstall(): void {
+    if (!this.armed || !this.pending) return;
+    this.armed = false;
+    void this.install();
+  }
+
+  /**
+   * Явная проверка (ручная кнопка в настройках, retry в ошибке): показываем
+   * ход через баннер — «проверяю» → «актуально»/«доступно»/«ошибка».
+   */
+  async check(): Promise<void> {
     if (this._state().kind === "downloading") return;
     this._state.set({ kind: "checking" });
     try {
       const update = await check();
       if (!update) {
         this.pending = null;
-        this._state.set(silent ? { kind: "idle" } : { kind: "uptodate" });
+        this._state.set({ kind: "uptodate" });
         return;
       }
       this.pending = update;
@@ -51,11 +102,7 @@ export class AppUpdaterService {
       });
     } catch (err) {
       this.pending = null;
-      if (silent) {
-        this._state.set({ kind: "idle" });
-      } else {
-        this._state.set({ kind: "error", message: String(err) });
-      }
+      this._state.set({ kind: "error", message: String(err) });
     }
   }
 

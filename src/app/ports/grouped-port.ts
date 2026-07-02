@@ -52,14 +52,38 @@ export interface PortSubGroup {
 }
 
 /**
- * Корзина строк одной группы; заполняется за один проход группировки. Плоские
- * группы (локальные категории) держат порты в `rows`; группа «Docker» вместо
+ * Корзина строк одной группы; заполняется за один проход группировки. Обычные
+ * группы (по имени процесса) держат порты в `rows`; группа «Docker» вместо
  * этого раскладывает их по `subGroups` (проектам).
  */
 export interface PortGroup {
   id: string;
   label: string;
   rows: GroupedPort[];
+  /**
+   * `label` — ключ каталога переводов (переводить в шаблоне), а не сырое имя.
+   * true только у особых групп (Docker, «Прочее»); динамические группы по имени
+   * процесса выводят `label` как есть.
+   */
+  translate?: boolean;
   /** Сворачиваемые проекты — только у группы «Docker». */
   subGroups?: PortSubGroup[];
 }
+
+/** Число портов в группе (для плоских — строки, для «Docker» — сумма проектов). */
+export function groupSize(group: PortGroup): number {
+  if (!group.subGroups) return group.rows.length;
+  return group.subGroups.reduce((n, sub) => n + sub.rows.length, 0);
+}
+
+/**
+ * Особая группа «Docker»: собирает все контейнерные порты (джойн по контейнеру,
+ * а не по имени процесса). `label` — ключ перевода.
+ */
+export const DOCKER_GROUP = { id: "docker", label: "groups.docker" } as const;
+
+/**
+ * Остаточная группа «Прочее»: порты без имени процесса (`processName === null`).
+ * `label` — ключ перевода.
+ */
+export const OTHER_GROUP = { id: "other", label: "groups.other" } as const;

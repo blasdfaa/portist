@@ -2,18 +2,21 @@
   @if (confirming()) {
     <div class="row row--confirm">
       <span class="confirm-text">
-        Остановить {{ container.composeService ?? container.name }}?
+        {{
+          "ports.stopConfirm"
+            | transloco: { name: container.composeService ?? container.name }
+        }}
       </span>
       <span class="confirm-actions">
         <button type="button" class="confirm-btn" (click)="cancelStop()">
-          Отмена
+          {{ "common.cancel" | transloco }}
         </button>
         <button
           type="button"
           class="confirm-btn confirm-btn--danger"
           (click)="confirmStop()"
         >
-          Остановить
+          {{ "ports.stop" | transloco }}
         </button>
       </span>
     </div>
@@ -46,7 +49,7 @@
             type="button"
             class="act act--open"
             (click)="open.emit()"
-            [title]="'Открыть localhost:' + row().port.port"
+            [title]="'ports.openLocalhost' | transloco: { port: row().port.port }"
           >
             ↗
           </button>
@@ -55,7 +58,7 @@
           type="button"
           class="act act--stop"
           (click)="askStop()"
-          [title]="'Остановить контейнер ' + container.name"
+          [title]="'ports.stopContainer' | transloco: { name: container.name }"
         >
           ⏹
         </button>
@@ -71,7 +74,7 @@
     role="button"
     [attr.tabindex]="active() ? 0 : -1"
     [attr.data-key]="row().port.protocol + row().port.port"
-    [attr.aria-label]="'Детали порта ' + row().port.port"
+    [attr.aria-label]="'ports.portDetails' | transloco: { port: row().port.port }"
     (click)="select.emit()"
     (keydown.enter)="select.emit()"
     (keydown.space)="$event.preventDefault(); select.emit()"
@@ -101,7 +104,7 @@
           type="button"
           class="act act--open"
           (click)="$event.stopPropagation(); open.emit()"
-          [title]="'Открыть localhost:' + row().port.port"
+          [title]="'ports.openLocalhost' | transloco: { port: row().port.port }"
         >
           ↗
         </button>
@@ -111,7 +114,7 @@
           type="button"
           class="act act--kill"
           (click)="$event.stopPropagation(); kill.emit()"
-          title="Завершить процесс"
+          [title]="'ports.killProcess' | transloco"
         >
           ✕
         </button>

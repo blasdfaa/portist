@@ -6,18 +6,19 @@ import {
   signal,
 } from "@angular/core";
 import { Router } from "@angular/router";
+import { TranslocoPipe } from "@jsverse/transloco";
 
 import type { PortInfo } from "../../core/models";
 import { ShellApiService } from "../../core/shell-api-service";
 import { DetailSessionService } from "../../detail/detail-session-service";
-import type { GroupedPort, PortGroup } from "../grouped-port";
+import { type GroupedPort, groupSize } from "../grouped-port";
 import { PortInventoryService } from "../port-inventory-service";
 import { PortRow } from "../port-row/port-row";
 
 /** Экран списка слушающих портов: поиск, группировка, переход к карточке. */
 @Component({
   selector: "app-ports-list",
-  imports: [PortRow],
+  imports: [PortRow, TranslocoPipe],
   changeDetection: ChangeDetectionStrategy.OnPush,
   templateUrl: "./ports-list.html",
   styleUrl: "./ports-list.css",
@@ -60,11 +61,8 @@ export class PortsList {
     await this.inventory.stopContainer(id);
   }
 
-  /** Число портов в группе (для плоских — строки, для «Docker» — сумма проектов). */
-  groupSize(group: PortGroup): number {
-    if (!group.subGroups) return group.rows.length;
-    return group.subGroups.reduce((n, sub) => n + sub.rows.length, 0);
-  }
+  /** Число портов в группе — общий помощник модели. */
+  protected readonly groupSize = groupSize;
 
   /** Раскрыт ли docker-проект. При активном поиске раскрыты все — чтобы видеть совпадения. */
   isExpanded(subId: string): boolean {

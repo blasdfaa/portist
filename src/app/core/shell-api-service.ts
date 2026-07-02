@@ -38,9 +38,4 @@ export class ShellApiService {
   onPopoverShown(handler: () => void): Promise<UnlistenFn> {
     return listen("popover-shown", () => handler());
   }
-
-  /** Подписка на «Проверить обновления» из трей-меню (Rust шлёт при клике). */
-  onCheckUpdates(handler: () => void): Promise<UnlistenFn> {
-    return listen("check-updates", () => handler());
-  }
 }

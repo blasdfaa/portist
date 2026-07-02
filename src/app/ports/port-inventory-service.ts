@@ -3,6 +3,7 @@ import { Injectable, computed, inject, signal } from "@angular/core";
 import type { ContainerInfo, PortInfo } from "../core/models";
 import { PORT_BRIDGE } from "../core/port-bridge";
 import { PreferencesService } from "../settings/preferences-service";
+import { orderGroups } from "./group-order";
 import { indexContainersByPort, portKey } from "./grouped-port";
 import { PortGrouperService } from "./port-grouper-service";
 
@@ -31,28 +32,12 @@ export class PortInventoryService {
   );
 
   /**
-   * Порты к показу: при включённом «скрыть системные» жёстко исключаем
-   * системные (не-docker) порты — до счётчика, поиска и группировки. Docker-порты
-   * под правило не подпадают (уходят в группу Docker раньше правил).
-   */
-  private readonly visiblePorts = computed(() => {
-    const ports = this.ports();
-    if (!this.prefs.hideSystemPorts()) return ports;
-    const byPort = this.containerByPort();
-    return ports.filter(
-      (p) =>
-        byPort.has(portKey(p.protocol, p.port)) ||
-        !this.grouper.isSystemPort(p.port),
-    );
-  });
-
-  /**
    * Порты после поиска: по номеру, имени процесса или полям контейнера
    * (имя/образ/compose-проект/сервис).
    */
   private readonly filtered = computed(() => {
     const q = this._query().trim().toLowerCase();
-    const ports = this.visiblePorts();
+    const ports = this.ports();
     if (!q) return ports;
     const byPort = this.containerByPort();
     return ports.filter((p) => {
@@ -66,10 +51,11 @@ export class PortInventoryService {
     });
   });
 
-  readonly groups = computed(() =>
-    this.grouper.group(this.filtered(), this.containers()),
-  );
-  readonly total = computed(() => this.visiblePorts().length);
+  readonly groups = computed(() => {
+    const groups = this.grouper.group(this.filtered(), this.containers());
+    return orderGroups(groups, this.prefs.pinnedGroups(), this.prefs.groupSort());
+  });
+  readonly total = computed(() => this.ports().length);
   readonly filteredTotal = computed(() => this.filtered().length);
 
   /** id свёрнутых docker-проектов. По умолчанию все раскрыты (пустое). */

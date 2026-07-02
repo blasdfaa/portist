@@ -103,6 +103,23 @@
   }
 }
 
+/* Выбор языка — нативный select под палитру терминала. */
+.lang-select {
+  height: 26px;
+  padding: 0 8px;
+  font: inherit;
+  font-size: 12px;
+  color: var(--text);
+  background: var(--panel-hi);
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  cursor: pointer;
+  transition: border-color 0.12s ease;
+}
+.lang-select:hover {
+  border-color: var(--signal-dim);
+}
+
 /* Pill-тумблер для булевых настроек */
 .toggle {
   position: relative;
@@ -144,9 +161,53 @@
   }
 }
 
+/* Ручная проверка обновлений в описании строки «Автообновление»:
+   ссылка-статус под названием (проецируется в слот [desc] setting-row). */
+.upd-check {
+  align-self: flex-start;
+  margin-top: 1px;
+  padding: 0;
+  font: inherit;
+  font-size: 11px;
+  line-height: 1.45;
+  text-align: left;
+  color: var(--muted);
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  transition: color 0.12s ease;
+}
+.upd-check:hover:not(:disabled) {
+  color: var(--signal);
+}
+.upd-check:disabled {
+  color: var(--muted-dim);
+  cursor: default;
+}
+
 /* Номер версии — статичное значение справа в строке */
 .version {
   font-size: 12px;
   color: var(--muted);
   font-variant-numeric: tabular-nums;
+}
+
+/* Кнопка «Настроить» — открывает модалку порядка групп */
+.configure {
+  height: 26px;
+  padding: 0 12px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: var(--panel-hi);
+  color: var(--text);
+  font: inherit;
+  font-size: 12px;
+  cursor: pointer;
+  transition:
+    color 0.12s ease,
+    border-color 0.12s ease;
+}
+.configure:hover {
+  color: var(--signal);
+  border-color: var(--signal-dim);
 }

@@ -1,0 +1,221 @@
+:host {
+  display: contents;
+}
+
+/* Затемняющий фон поверх всей оболочки; клик закрывает. Абсолютный внутри
+   .shell (position: relative) — скругление обрезает углы. */
+.backdrop {
+  position: absolute;
+  inset: 0;
+  z-index: 100;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 18px;
+  background: color-mix(in srgb, var(--panel) 70%, transparent);
+  backdrop-filter: blur(2px);
+}
+
+.panel {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  max-width: 320px;
+  max-height: 100%;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  background: var(--panel);
+  box-shadow: 0 12px 32px rgb(0 0 0 / 40%);
+  overflow: hidden;
+}
+
+.panel-head {
+  flex: 0 0 auto;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 0 8px 0 12px;
+  height: 42px;
+  border-bottom: 1px solid var(--line);
+  background: linear-gradient(180deg, var(--panel-hi), var(--panel));
+}
+.panel-title {
+  flex: 1 1 auto;
+  color: var(--text);
+  font-weight: 700;
+  font-size: 13px;
+  letter-spacing: 0.3px;
+}
+.panel-close {
+  width: 26px;
+  height: 26px;
+  display: grid;
+  place-items: center;
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  background: transparent;
+  color: var(--muted);
+  font-size: 13px;
+  line-height: 1;
+  cursor: pointer;
+  transition:
+    color 0.12s ease,
+    border-color 0.12s ease;
+}
+.panel-close:hover {
+  color: var(--signal);
+  border-color: var(--signal-dim);
+}
+
+.panel-body {
+  flex: 1 1 auto;
+  overflow-y: auto;
+  padding: 12px 14px 14px;
+}
+
+/* Короткая подсказка: как закрепить и перетащить группу */
+.panel-hint {
+  margin: 0 0 12px;
+  color: var(--muted);
+  font-size: 11px;
+  line-height: 1.45;
+}
+
+/* Переключатель ключа сортировки хвоста */
+.sort-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  margin-bottom: 12px;
+}
+.sort-label {
+  color: var(--muted);
+  font-size: 12px;
+}
+.seg {
+  display: inline-flex;
+  padding: 2px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: var(--panel-hi);
+}
+.seg-btn {
+  padding: 3px 10px;
+  border: none;
+  border-radius: 6px;
+  background: transparent;
+  color: var(--muted);
+  font: inherit;
+  font-size: 11px;
+  cursor: pointer;
+  transition:
+    color 0.12s ease,
+    background 0.12s ease;
+}
+.seg-btn:hover {
+  color: var(--text);
+}
+.seg-btn--active {
+  background: var(--row-hover);
+  color: var(--signal);
+}
+
+.section-label {
+  margin: 10px 2px 6px;
+  color: var(--muted-dim, var(--muted));
+  font-size: 10px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.6px;
+}
+
+.olist {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.oitem {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  height: 34px;
+  padding: 0 10px 0 8px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: var(--panel-hi);
+  color: var(--text);
+  font-size: 12px;
+}
+.oitem--static {
+  margin-bottom: 6px;
+}
+.ohandle {
+  color: var(--muted);
+  font-size: 14px;
+  line-height: 1;
+  cursor: grab;
+  touch-action: none;
+}
+.ohandle:active {
+  cursor: grabbing;
+}
+.opin {
+  width: 20px;
+  padding: 0;
+  border: none;
+  background: transparent;
+  color: var(--muted);
+  font-size: 13px;
+  line-height: 1;
+  cursor: pointer;
+  transition: color 0.12s ease;
+}
+.opin:hover {
+  color: var(--signal);
+}
+.opin--on {
+  color: var(--signal);
+}
+.oname {
+  flex: 1 1 auto;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+.ocount {
+  color: var(--muted);
+  font-size: 11px;
+  font-variant-numeric: tabular-nums;
+}
+
+.empty {
+  padding: 4px 2px 2px;
+  color: var(--muted);
+  font-size: 11px;
+}
+
+/* Состояния CDK drag-drop (превью держим в родителе — cdkDragPreviewContainer). */
+.cdk-drag-preview {
+  box-sizing: border-box;
+  border-color: var(--signal-dim);
+  box-shadow: 0 4px 14px rgb(0 0 0 / 35%);
+}
+.cdk-drag-placeholder {
+  opacity: 0.35;
+}
+.cdk-drag-animating {
+  transition: transform 0.18s cubic-bezier(0, 0, 0.2, 1);
+}
+.olist.cdk-drop-list-dragging .oitem:not(.cdk-drag-placeholder) {
+  transition: transform 0.18s cubic-bezier(0, 0, 0.2, 1);
+}
+@media (prefers-reduced-motion: reduce) {
+  .backdrop {
+    backdrop-filter: none;
+  }
+  .cdk-drag-animating,
+  .olist.cdk-drop-list-dragging .oitem:not(.cdk-drag-placeholder) {
+    transition: none;
+  }
+}

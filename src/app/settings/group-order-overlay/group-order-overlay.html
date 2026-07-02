@@ -1,0 +1,107 @@
+<div class="backdrop" (click)="onClose()">
+  <div
+    class="panel"
+    role="dialog"
+    aria-modal="true"
+    [attr.aria-label]="'settings.groupOrder' | transloco"
+    (click)="$event.stopPropagation()"
+  >
+    <header class="panel-head">
+      <span class="panel-title">{{ "settings.groupOrder" | transloco }}</span>
+      <button
+        type="button"
+        class="panel-close"
+        (click)="onClose()"
+        [title]="'settings.close' | transloco"
+      >
+        ✕
+      </button>
+    </header>
+
+    <div class="panel-body">
+      <p class="panel-hint">{{ "settings.groupOrderHint" | transloco }}</p>
+
+      <div class="sort-row">
+        <span class="sort-label">{{ "settings.sortOthers" | transloco }}</span>
+        <div class="seg" role="radiogroup">
+          <button
+            type="button"
+            class="seg-btn"
+            role="radio"
+            [class.seg-btn--active]="prefs.groupSort() === 'alpha'"
+            [attr.aria-checked]="prefs.groupSort() === 'alpha'"
+            (click)="setSort('alpha')"
+          >
+            {{ "settings.sortName" | transloco }}
+          </button>
+          <button
+            type="button"
+            class="seg-btn"
+            role="radio"
+            [class.seg-btn--active]="prefs.groupSort() === 'ports'"
+            [attr.aria-checked]="prefs.groupSort() === 'ports'"
+            (click)="setSort('ports')"
+          >
+            {{ "settings.sortPorts" | transloco }}
+          </button>
+        </div>
+      </div>
+
+      <div class="section-label">{{ "settings.pinned" | transloco }}</div>
+      @if (pinned().length) {
+        <div class="olist" cdkDropList (cdkDropListDropped)="onDrop($event)">
+          @for (g of pinned(); track g.id) {
+            <div class="oitem" cdkDrag cdkDragPreviewContainer="parent">
+              <span class="ohandle" cdkDragHandle [attr.aria-hidden]="true"
+                >⠿</span
+              >
+              <button
+                type="button"
+                class="opin opin--on"
+                (click)="prefs.togglePin(g.id)"
+                [attr.aria-label]="'settings.unpin' | transloco"
+              >
+                ★
+              </button>
+              <span class="oname">
+                @if (g.translate) {
+                  {{ g.label | transloco }}
+                } @else {
+                  {{ g.label }}
+                }
+              </span>
+              <span class="ocount">{{ g.count }}</span>
+            </div>
+          }
+        </div>
+      } @else {
+        <div class="empty">{{ "settings.pinnedEmpty" | transloco }}</div>
+      }
+
+      <div class="section-label">{{ "settings.others" | transloco }}</div>
+      @for (g of tail(); track g.id) {
+        <div class="oitem oitem--static">
+          <button
+            type="button"
+            class="opin"
+            (click)="prefs.togglePin(g.id)"
+            [attr.aria-label]="'settings.pin' | transloco"
+          >
+            ☆
+          </button>
+          <span class="oname">
+            @if (g.translate) {
+              {{ g.label | transloco }}
+            } @else {
+              {{ g.label }}
+            }
+          </span>
+          <span class="ocount">{{ g.count }}</span>
+        </div>
+      }
+      @if (!tail().length) {
+        <div class="empty">{{ "settings.othersEmpty" | transloco }}</div>
+      }
+    </div>
+  </div>
+</div>

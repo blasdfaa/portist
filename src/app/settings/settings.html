@@ -1,14 +1,23 @@
 <div class="settings">
   <header class="head" data-tauri-drag-region>
-    <button type="button" class="back" (click)="back()" title="Назад">
+    <button
+      type="button"
+      class="back"
+      (click)="back()"
+      [title]="'common.back' | transloco"
+    >
       ‹
     </button>
-    <span class="title">Настройки</span>
+    <span class="title">{{ "settings.title" | transloco }}</span>
   </header>
 
   <div class="content">
-    <app-setting-row label="Тема">
-      <div class="switch" role="radiogroup" aria-label="Тема оформления">
+    <app-setting-row [label]="'settings.theme' | transloco">
+      <div
+        class="switch"
+        role="radiogroup"
+        [attr.aria-label]="'settings.themeAria' | transloco"
+      >
         <span
           class="switch-thumb"
           [style.transform]="'translateX(' + activeIndex() * 100 + '%)'"
@@ -20,8 +29,8 @@
             role="radio"
             [class.switch-seg--active]="theme.mode() === opt.value"
             [attr.aria-checked]="theme.mode() === opt.value"
-            [attr.aria-label]="opt.label"
-            [title]="opt.label"
+            [attr.aria-label]="opt.label | transloco"
+            [title]="opt.label | transloco"
             (click)="theme.setMode(opt.value)"
           >
             {{ opt.glyph }}
@@ -30,24 +39,70 @@
       </div>
     </app-setting-row>
 
-    <app-setting-row label="Скрыть системные порты">
+    <app-setting-row [label]="'settings.language' | transloco">
+      <select
+        class="lang-select"
+        [value]="language.lang()"
+        [attr.aria-label]="'settings.languageAria' | transloco"
+        (change)="onLangChange($event)"
+      >
+        @for (opt of langOptions; track opt.value) {
+          <option [value]="opt.value">{{ opt.label }}</option>
+        }
+      </select>
+    </app-setting-row>
+
+    <app-setting-row [label]="'settings.groupOrder' | transloco">
+      <button
+        type="button"
+        class="configure"
+        (click)="orderModalOpen.set(true)"
+      >
+        {{ "settings.configure" | transloco }}
+      </button>
+    </app-setting-row>
+
+    <app-setting-row [label]="'settings.autoUpdate' | transloco">
+      <button
+        desc
+        type="button"
+        class="upd-check"
+        [disabled]="updateBusy()"
+        (click)="updater.check()"
+      >
+        @switch (updater.state().kind) {
+          @case ("checking") {
+            {{ "update.checking" | transloco }}
+          }
+          @case ("uptodate") {
+            {{ "update.upToDate" | transloco }}
+          }
+          @default {
+            {{ "settings.checkUpdates" | transloco }}
+          }
+        }
+      </button>
       <button
         type="button"
         class="toggle"
         role="switch"
-        [class.toggle--on]="prefs.hideSystemPorts()"
-        [attr.aria-checked]="prefs.hideSystemPorts()"
-        aria-label="Скрыть системные порты"
-        (click)="prefs.toggleHideSystemPorts()"
+        [class.toggle--on]="prefs.autoUpdate()"
+        [attr.aria-checked]="prefs.autoUpdate()"
+        [attr.aria-label]="'settings.autoUpdate' | transloco"
+        (click)="prefs.toggleAutoUpdate()"
       >
         <span class="toggle-knob" [attr.aria-hidden]="true"></span>
       </button>
     </app-setting-row>
 
-    <app-setting-row label="Версия">
+    <app-setting-row [label]="'settings.version' | transloco">
       @if (version()) {
         <span class="version">v{{ version() }}</span>
       }
     </app-setting-row>
   </div>
+
+  @if (orderModalOpen()) {
+    <app-group-order-overlay (close)="orderModalOpen.set(false)" />
+  }
 </div>

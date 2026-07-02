@@ -149,13 +149,10 @@ pub fn run() {
             let autostart = CheckMenuItemBuilder::with_id("autostart", "Запускать при входе")
                 .checked(app.autolaunch().is_enabled().unwrap_or(false))
                 .build(app)?;
-            let check_updates =
-                MenuItemBuilder::with_id("check-updates", "Проверить обновления").build(app)?;
             let quit = MenuItemBuilder::with_id("quit", "Выйти из portist").build(app)?;
             let menu = MenuBuilder::new(app)
                 .item(&refresh)
                 .item(&autostart)
-                .item(&check_updates)
                 .separator()
                 .item(&quit)
                 .build()?;
@@ -171,11 +168,6 @@ pub fn run() {
                 .on_menu_event(move |app, event| match event.id().as_ref() {
                     "quit" => app.exit(0),
                     "refresh" => show_popover(app),
-                    // Показываем поповер и просим фронт запустить ручную проверку.
-                    "check-updates" => {
-                        show_popover(app);
-                        let _ = app.emit("check-updates", ());
-                    }
                     "autostart" => {
                         let manager = app.autolaunch();
                         let enabled = manager.is_enabled().unwrap_or(false);
