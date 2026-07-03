@@ -11,6 +11,7 @@ import { TranslocoPipe } from "@jsverse/transloco";
 import type { PortInfo } from "../../core/models";
 import { ShellApiService } from "../../core/shell-api-service";
 import { DetailSessionService } from "../../detail/detail-session-service";
+import { LabelPipe } from "../../i18n/label-pipe";
 import { type GroupedPort, groupSize } from "../grouped-port";
 import { PortInventoryService } from "../port-inventory-service";
 import { PortRow } from "../port-row/port-row";
@@ -18,7 +19,7 @@ import { PortRow } from "../port-row/port-row";
 /** Экран списка слушающих портов: поиск, группировка, переход к карточке. */
 @Component({
   selector: "app-ports-list",
-  imports: [PortRow, TranslocoPipe],
+  imports: [PortRow, TranslocoPipe, LabelPipe],
   changeDetection: ChangeDetectionStrategy.OnPush,
   templateUrl: "./ports-list.html",
   styleUrl: "./ports-list.css",

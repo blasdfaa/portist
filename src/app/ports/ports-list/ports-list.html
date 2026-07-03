@@ -87,13 +87,7 @@
       @for (group of inventory.groups(); track group.id) {
         <section class="group">
           <div class="group-head">
-            <span class="group-label">
-              @if (group.translate) {
-                {{ group.label | transloco }}
-              } @else {
-                {{ group.label }}
-              }
-            </span>
+            <span class="group-label">{{ group.label | label }}</span>
             <span class="group-rule"></span>
             <span class="group-count">{{ groupSize(group) }}</span>
           </div>
@@ -113,7 +107,7 @@
                     [attr.aria-hidden]="true"
                     >▸</span
                   >
-                  <span class="subgroup-label">{{ sub.label }}</span>
+                  <span class="subgroup-label">{{ sub.label | label }}</span>
                   <span class="subgroup-count">{{ sub.rows.length }}</span>
                 </button>
                 @if (isExpanded(sub.id)) {

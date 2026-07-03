@@ -2,6 +2,7 @@ import { Injectable } from "@angular/core";
 
 import type { ContainerInfo, PortInfo } from "../core/models";
 import { isLikelyHttp, serviceName } from "../core/port-catalog";
+import { labelText } from "../i18n/label";
 import {
   DOCKER_GROUP,
   type GroupedPort,
@@ -49,7 +50,6 @@ export class PortGrouperService {
     const other: PortGroup = {
       id: OTHER_GROUP.id,
       label: OTHER_GROUP.label,
-      translate: true,
       rows: [],
     };
 
@@ -71,7 +71,7 @@ export class PortGrouperService {
       }
       let group = byProcess.get(name);
       if (!group) {
-        group = { id: name, label: name, rows: [] };
+        group = { id: name, label: labelText(name), rows: [] };
         byProcess.set(name, group);
       }
       group.rows.push(row);
@@ -86,12 +86,11 @@ export class PortGrouperService {
             a.name.localeCompare(b.name),
         )
         .map((p) => p.sub);
-      // label — ключ каталога (переводится в шаблоне); подгруппы-проекты ниже
-      // остаются динамическими подписями «📦 имя» и не переводятся.
+      // label — ключ каталога (labelKey); подгруппы-проекты ниже несут
+      // динамические подписи-литералы «📦 имя» (labelText).
       groups.push({
         id: DOCKER_GROUP.id,
         label: DOCKER_GROUP.label,
-        translate: true,
         rows: [],
         subGroups,
       });
@@ -112,7 +111,7 @@ export class PortGrouperService {
         name,
         sub: {
           id: `docker:${name}`,
-          label: `${compose ? "📦" : "🐳"} ${name}`,
+          label: labelText(`${compose ? "📦" : "🐳"} ${name}`),
           rows: [],
         },
       };

@@ -1,30 +1,15 @@
 //! Завершение процессов.
 //!
-//! Абстракция [`ProcessKiller`] заложена как точка расширения: сегодня есть
-//! только [`NativeKiller`] для процессов текущего пользователя ([`KillMode::Normal`]).
-//! Позже рядом появится реализация с повышением прав ([`KillMode::Elevated`]):
-//! macOS — `osascript ... with administrator privileges`, Windows — `runas`/UAC,
-//! Linux — `pkexec`. Сигнатуры команд и фронта при этом не меняются.
-
-use serde::Deserialize;
-
-/// Режим завершения процесса.
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Deserialize, Default)]
-#[serde(rename_all = "lowercase")]
-pub enum KillMode {
-    /// Без повышения прав — только процессы текущего пользователя.
-    #[default]
-    Normal,
-    /// С повышением прав (пока не реализовано).
-    Elevated,
-}
+//! Пока поддерживается только завершение процессов текущего пользователя без
+//! повышения прав. Elevated kill (macOS `osascript … with administrator
+//! privileges`, Windows `runas`/UAC, Linux `pkexec`) — возможное будущее; шов
+//! под него вводится, когда дойдёт до реализации (см. `docs/adr/0001-*`).
 
 /// Ошибки завершения процесса.
 #[derive(Debug)]
 pub enum KillError {
     NotFound,
     PermissionDenied,
-    Unsupported,
     Other(String),
 }
 
@@ -33,26 +18,7 @@ impl std::fmt::Display for KillError {
         match self {
             KillError::NotFound => write!(f, "Процесс не найден"),
             KillError::PermissionDenied => write!(f, "Недостаточно прав для завершения процесса"),
-            KillError::Unsupported => write!(f, "Режим завершения пока не поддерживается"),
             KillError::Other(msg) => write!(f, "{msg}"),
-        }
-    }
-}
-
-/// Абстракция завершения процесса — точка расширения под elevated kill.
-pub trait ProcessKiller {
-    fn kill(&self, pid: u32, mode: KillMode) -> Result<(), KillError>;
-}
-
-/// Завершение средствами ОС без повышения прав.
-pub struct NativeKiller;
-
-impl ProcessKiller for NativeKiller {
-    fn kill(&self, pid: u32, mode: KillMode) -> Result<(), KillError> {
-        match mode {
-            KillMode::Normal => kill_normal(pid),
-            // Здесь в будущем подключится ElevatedKiller.
-            KillMode::Elevated => Err(KillError::Unsupported),
         }
     }
 }
@@ -108,8 +74,6 @@ fn kill_normal(pid: u32) -> Result<(), KillError> {
 
 /// Tauri-команда: завершить процесс по PID.
 #[tauri::command]
-pub fn kill_process(pid: u32, mode: Option<KillMode>) -> Result<(), String> {
-    NativeKiller
-        .kill(pid, mode.unwrap_or_default())
-        .map_err(|e| e.to_string())
+pub fn kill_process(pid: u32) -> Result<(), String> {
+    kill_normal(pid).map_err(|e| e.to_string())
 }

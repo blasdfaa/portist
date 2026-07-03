@@ -1,3 +1,4 @@
+import { localStorageAdapter } from "../core/persisted-signal";
 import { en } from "./en";
 import { type Translation, ru } from "./ru";
 
@@ -15,17 +16,20 @@ export const LANG_STORAGE_KEY = "portist.lang";
 export const TRANSLATIONS: Record<Lang, Translation> = { ru, en };
 
 /**
- * Начальный язык до загрузки Angular-DI: явный выбор из localStorage, иначе —
- * язык системы (`navigator.language`), иначе фолбек. Чистая функция без DI,
- * чтобы задать `defaultLang` в конфиге Transloco без гонок инициализации.
- * Пока пользователь не выбрал язык явно, приложение следует за системой.
+ * Политика «сырая строка → язык», общая для старта и для валидации: явный
+ * валидный выбор («ru»/«en») уважается, иначе — язык системы
+ * (`navigator.language`), иначе фолбек. Единственное место, где живёт правило.
+ */
+export function parseLang(raw: string | null): Lang {
+  if (raw === "ru" || raw === "en") return raw;
+  return navigator.language.toLowerCase().startsWith("ru") ? "ru" : FALLBACK_LANG;
+}
+
+/**
+ * Начальный язык до загрузки Angular-DI: сохранённый выбор из хранилища через
+ * {@link parseLang}. Чистая привязка к `defaultLang` Transloco без гонок
+ * инициализации; пока пользователь не выбрал язык явно, следуем за системой.
  */
 export function resolveInitialLang(): Lang {
-  try {
-    const saved = localStorage.getItem(LANG_STORAGE_KEY);
-    if (saved === "ru" || saved === "en") return saved;
-  } catch {
-    // localStorage может быть недоступен — падаем на определение по системе.
-  }
-  return navigator.language.toLowerCase().startsWith("ru") ? "ru" : FALLBACK_LANG;
+  return parseLang(localStorageAdapter.read(LANG_STORAGE_KEY));
 }

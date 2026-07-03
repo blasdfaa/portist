@@ -14,6 +14,8 @@ import {
 } from "@angular/core";
 import { TranslocoPipe } from "@jsverse/transloco";
 
+import { type Label, labelText } from "../../i18n/label";
+import { LabelPipe } from "../../i18n/label-pipe";
 import type { GroupSort } from "../../ports/group-order";
 import {
   DOCKER_GROUP,
@@ -23,11 +25,10 @@ import {
 import { PortInventoryService } from "../../ports/port-inventory-service";
 import { PreferencesService } from "../preferences-service";
 
-/** Пункт списка групп в модалке: id, подпись (+флаг перевода) и число портов. */
+/** Пункт списка групп в модалке: id, подпись ({@link Label}) и число портов. */
 interface GroupItem {
   id: string;
-  label: string;
-  translate: boolean;
+  label: Label;
   count: number;
 }
 
@@ -40,7 +41,7 @@ interface GroupItem {
  */
 @Component({
   selector: "app-group-order-overlay",
-  imports: [TranslocoPipe, CdkDropList, CdkDrag, CdkDragHandle],
+  imports: [TranslocoPipe, LabelPipe, CdkDropList, CdkDrag, CdkDragHandle],
   changeDetection: ChangeDetectionStrategy.OnPush,
   templateUrl: "./group-order-overlay.html",
   styleUrl: "./group-order-overlay.css",
@@ -58,7 +59,6 @@ export class GroupOrderOverlay {
     this.inventory.groups().map((g) => ({
       id: g.id,
       label: g.label,
-      translate: g.translate ?? false,
       count: groupSize(g),
     })),
   );
@@ -86,10 +86,10 @@ export class GroupOrderOverlay {
   /** Пункт для закреплённой, но сейчас отсутствующей группы (число портов 0). */
   private absentItem(id: string): GroupItem {
     if (id === DOCKER_GROUP.id)
-      return { id, label: DOCKER_GROUP.label, translate: true, count: 0 };
+      return { id, label: DOCKER_GROUP.label, count: 0 };
     if (id === OTHER_GROUP.id)
-      return { id, label: OTHER_GROUP.label, translate: true, count: 0 };
-    return { id, label: id, translate: false, count: 0 };
+      return { id, label: OTHER_GROUP.label, count: 0 };
+    return { id, label: labelText(id), count: 0 };
   }
 
   /** Переставили закреплённую группу — фиксируем новый порядок. */

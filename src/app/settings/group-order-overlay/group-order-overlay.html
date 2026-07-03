@@ -63,13 +63,7 @@
               >
                 ★
               </button>
-              <span class="oname">
-                @if (g.translate) {
-                  {{ g.label | transloco }}
-                } @else {
-                  {{ g.label }}
-                }
-              </span>
+              <span class="oname">{{ g.label | label }}</span>
               <span class="ocount">{{ g.count }}</span>
             </div>
           }
@@ -89,13 +83,7 @@
           >
             ☆
           </button>
-          <span class="oname">
-            @if (g.translate) {
-              {{ g.label | transloco }}
-            } @else {
-              {{ g.label }}
-            }
-          </span>
+          <span class="oname">{{ g.label | label }}</span>
           <span class="ocount">{{ g.count }}</span>
         </div>
       }

@@ -13,7 +13,6 @@ import type { Observable } from "rxjs";
 
 import { ShellApiService } from "../../core/shell-api-service";
 import type { Lang } from "../../i18n/lang";
-import { PortInventoryService } from "../../ports/port-inventory-service";
 import { DetailSessionService } from "../detail-session-service";
 import {
   PORT_DETAIL_FIELDS,
@@ -30,7 +29,6 @@ import {
 })
 export class PortDetail implements OnDestroy {
   private readonly shell = inject(ShellApiService);
-  private readonly inventory = inject(PortInventoryService);
   private readonly session = inject(DetailSessionService);
   private readonly router = inject(Router);
   private readonly transloco = inject(TranslocoService);
@@ -55,11 +53,8 @@ export class PortDetail implements OnDestroy {
   );
   readonly loading = computed(() => this.session.details.isLoading());
 
-  /** Ошибка карточки = отказ загрузки деталей или неудавшийся kill. */
-  readonly error = computed(() => {
-    const err = this.session.details.error();
-    return err ? String(err) : this.inventory.error();
-  });
+  /** Ошибка карточки — единый источник: сессия сводит отказ деталей и kill. */
+  readonly error = this.session.error;
 
   /** id поля, чьё значение только что скопировали (для фидбэка). */
   readonly copiedId = signal<string | null>(null);
@@ -109,9 +104,7 @@ export class PortDetail implements OnDestroy {
 
   /** Завершить процесс и, при успехе, вернуться к списку. */
   async kill(): Promise<void> {
-    const pid = this.port().pid;
-    if (pid === null) return;
-    if (await this.inventory.kill(pid)) this.back();
+    if (await this.session.kill()) this.back();
   }
 
   async copy(id: string, text: string): Promise<void> {

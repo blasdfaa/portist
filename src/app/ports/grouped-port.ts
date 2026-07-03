@@ -1,4 +1,5 @@
 import type { ContainerInfo, PortInfo } from "../core/models";
+import { type Label, labelKey } from "../i18n/label";
 
 /**
  * Строка списка: порт плюс производные факты, рождённые из единственного
@@ -47,7 +48,7 @@ export function indexContainersByPort(
  */
 export interface PortSubGroup {
   id: string;
-  label: string;
+  label: Label;
   rows: GroupedPort[];
 }
 
@@ -58,14 +59,12 @@ export interface PortSubGroup {
  */
 export interface PortGroup {
   id: string;
-  label: string;
-  rows: GroupedPort[];
   /**
-   * `label` — ключ каталога переводов (переводить в шаблоне), а не сырое имя.
-   * true только у особых групп (Docker, «Прочее»); динамические группы по имени
-   * процесса выводят `label` как есть.
+   * Подпись группы: ключ каталога у особых групп (Docker, «Прочее»), литерал —
+   * у динамических групп по имени процесса. Различие несёт тип {@link Label}.
    */
-  translate?: boolean;
+  label: Label;
+  rows: GroupedPort[];
   /** Сворачиваемые проекты — только у группы «Docker». */
   subGroups?: PortSubGroup[];
 }
@@ -80,10 +79,10 @@ export function groupSize(group: PortGroup): number {
  * Особая группа «Docker»: собирает все контейнерные порты (джойн по контейнеру,
  * а не по имени процесса). `label` — ключ перевода.
  */
-export const DOCKER_GROUP = { id: "docker", label: "groups.docker" } as const;
+export const DOCKER_GROUP = { id: "docker", label: labelKey("groups.docker") } as const;
 
 /**
  * Остаточная группа «Прочее»: порты без имени процесса (`processName === null`).
  * `label` — ключ перевода.
  */
-export const OTHER_GROUP = { id: "other", label: "groups.other" } as const;
+export const OTHER_GROUP = { id: "other", label: labelKey("groups.other") } as const;

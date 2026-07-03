@@ -1,16 +1,45 @@
-import { Injectable, effect, signal } from "@angular/core";
+import { Injectable } from "@angular/core";
 
+import { type Codec, persistedSignal } from "../core/persisted-signal";
 import type { GroupSort } from "../ports/group-order";
 
 const PINNED_KEY = "portist.pinnedGroups";
 const GROUP_SORT_KEY = "portist.groupSort";
 const AUTO_UPDATE_KEY = "portist.autoUpdate";
 
+/** Кодек закреплённых групп: JSON-массив строк, иначе пусто. */
+export const pinnedCodec: Codec<string[]> = {
+  parse: (raw) => {
+    if (!raw) return [];
+    try {
+      const value: unknown = JSON.parse(raw);
+      return Array.isArray(value) && value.every((v) => typeof v === "string")
+        ? (value as string[])
+        : [];
+    } catch {
+      return [];
+    }
+  },
+  serialize: (ids) => JSON.stringify(ids),
+};
+
+/** Кодек ключа сортировки хвоста; дефолт — по алфавиту. */
+export const groupSortCodec: Codec<GroupSort> = {
+  parse: (raw) => (raw === "ports" ? "ports" : "alpha"),
+  serialize: (sort) => sort,
+};
+
+/** Кодек автообновления: «1»/«0», отсутствие значения = включено. */
+export const autoUpdateCodec: Codec<boolean> = {
+  parse: (raw) => raw !== "0",
+  serialize: (on) => (on ? "1" : "0"),
+};
+
 /**
- * Пользовательские настройки списка портов. По образцу {@link ThemeService}: сигнал +
- * `effect`, пишущий в localStorage. Заведён отдельно от темы, чтобы сюда же
- * складывать будущие тумблеры отображения (живой авто-рефреш, фильтр «виден в
- * сети» и т.п.), не раздувая сервис темы.
+ * Пользовательские настройки списка портов. Каждый ключ персистится через
+ * {@link persistedSignal} — read/write/валидация живут в кодеке и шве, не здесь.
+ * Заведён отдельно от темы, чтобы сюда же складывать будущие тумблеры
+ * отображения (живой авто-рефреш, фильтр «виден в сети» и т.п.).
  */
 @Injectable({ providedIn: "root" })
 export class PreferencesService {
@@ -18,28 +47,16 @@ export class PreferencesService {
    * Закреплённые сверху группы (id в пользовательском порядке). Всё незакреплённое
    * сортируется автоматически по {@link groupSort}. См. {@link ../ports/group-order}.
    */
-  private readonly _pinnedGroups = signal<string[]>(this.readPinned());
+  private readonly _pinnedGroups = persistedSignal(PINNED_KEY, pinnedCodec);
   readonly pinnedGroups = this._pinnedGroups.asReadonly();
 
   /** Ключ авто-сортировки незакреплённого «хвоста» групп. */
-  private readonly _groupSort = signal<GroupSort>(this.readGroupSort());
+  private readonly _groupSort = persistedSignal(GROUP_SORT_KEY, groupSortCodec);
   readonly groupSort = this._groupSort.asReadonly();
 
-  private readonly _autoUpdate = signal<boolean>(this.readAutoUpdate());
+  private readonly _autoUpdate = persistedSignal(AUTO_UPDATE_KEY, autoUpdateCodec);
   /** Ставить ли найденный апдейт автоматически (иначе — баннер с ручной кнопкой). */
   readonly autoUpdate = this._autoUpdate.asReadonly();
-
-  constructor() {
-    effect(() => {
-      localStorage.setItem(PINNED_KEY, JSON.stringify(this._pinnedGroups()));
-    });
-    effect(() => {
-      localStorage.setItem(GROUP_SORT_KEY, this._groupSort());
-    });
-    effect(() => {
-      localStorage.setItem(AUTO_UPDATE_KEY, this._autoUpdate() ? "1" : "0");
-    });
-  }
 
   /** Задать порядок закреплённых групп (id в желаемом порядке). */
   setPinnedGroups(ids: string[]): void {
@@ -60,29 +77,5 @@ export class PreferencesService {
 
   toggleAutoUpdate(): void {
     this._autoUpdate.update((v) => !v);
-  }
-
-  /** Прочитать закреплённые группы; дефолт — пусто (всё авто-сортируется). */
-  private readPinned(): string[] {
-    const raw = localStorage.getItem(PINNED_KEY);
-    if (!raw) return [];
-    try {
-      const value: unknown = JSON.parse(raw);
-      return Array.isArray(value) && value.every((v) => typeof v === "string")
-        ? (value as string[])
-        : [];
-    } catch {
-      return [];
-    }
-  }
-
-  /** Прочитать ключ сортировки хвоста; дефолт — по алфавиту. */
-  private readGroupSort(): GroupSort {
-    return localStorage.getItem(GROUP_SORT_KEY) === "ports" ? "ports" : "alpha";
-  }
-
-  /** Прочитать флаг автообновления; дефолт — включено (отсутствие значения = «1»). */
-  private readAutoUpdate(): boolean {
-    return localStorage.getItem(AUTO_UPDATE_KEY) !== "0";
   }
 }

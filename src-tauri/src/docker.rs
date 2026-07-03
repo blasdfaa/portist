@@ -1,17 +1,18 @@
 //! Docker-осведомлённость: маппинг опубликованных портов на контейнеры.
 //!
-//! Ходим в Docker Engine API напрямую по unix-сокету рукописным мини-HTTP —
-//! синхронно и без тяжёлых зависимостей, в духе тонкого бэкенда. Отдаём фронту
-//! «сырые факты» о контейнерах; джойн порт↔контейнер и группировку делает
-//! Angular, как и с обычными портами.
+//! Ходим в Docker Engine API напрямую по unix-сокету (на Windows — по named
+//! pipe) рукописным мини-HTTP — синхронно и без тяжёлых зависимостей, в духе
+//! тонкого бэкенда. Отдаём фронту «сырые факты» о контейнерах; джойн
+//! порт↔контейнер и группировку делает Angular, как и с обычными портами.
 //!
 //! Любая проблема — сокет не найден, таймаут, ошибка демона — деградирует в
 //! «контейнеров нет»: список портов на фронте от этого не страдает (там
 //! `Promise.allSettled`).
 
 use std::io::{Read, Write};
-use std::os::unix::net::UnixStream;
-use std::path::PathBuf;
+use std::path::{Path, PathBuf};
+
+#[cfg(unix)]
 use std::time::Duration;
 
 use serde::Serialize;
@@ -19,6 +20,8 @@ use serde_json::Value;
 
 /// Таймаут на чтение/запись сокета. Короткий: запрос идёт параллельно
 /// `list_ports`, и медленный Docker не должен задерживать первую отрисовку.
+/// Только Unix: у Windows named pipe (`std::fs::File`) таймаут не выставить.
+#[cfg(unix)]
 const IO_TIMEOUT: Duration = Duration::from_millis(600);
 
 /// Один опубликованный на хост порт контейнера. По `public_port` + `protocol`
@@ -49,9 +52,11 @@ pub struct ContainerInfo {
     pub ports: Vec<ContainerPort>,
 }
 
-/// Ищет docker-совместимый сокет: `DOCKER_HOST` → известные пути. `None` —
-/// Docker не найден, фича молча выключается.
-fn docker_socket() -> Option<PathBuf> {
+/// Ищет адрес демона: unix-сокет (`DOCKER_HOST` → известные пути) на *nix,
+/// именованный пайп на Windows. `None` — Docker не найден, фича молча
+/// выключается.
+#[cfg(unix)]
+fn docker_endpoint() -> Option<PathBuf> {
     if let Ok(host) = std::env::var("DOCKER_HOST") {
         if let Some(path) = host.strip_prefix("unix://") {
             let pb = PathBuf::from(path);
@@ -74,16 +79,51 @@ fn docker_socket() -> Option<PathBuf> {
     candidates.into_iter().find(|p| p.exists())
 }
 
+/// Windows: Docker Desktop публикует Engine API именованным пайпом. Уважаем
+/// `DOCKER_HOST=npipe://…`, иначе — путь по умолчанию. Существование пайпа
+/// надёжно не проверить через `exists()`, поэтому путь отдаём всегда —
+/// недоступность выяснится уже при подключении.
+#[cfg(windows)]
+fn docker_endpoint() -> Option<PathBuf> {
+    if let Ok(host) = std::env::var("DOCKER_HOST") {
+        if let Some(path) = host.strip_prefix("npipe://") {
+            return Some(PathBuf::from(path.replace('/', "\\")));
+        }
+    }
+    Some(PathBuf::from(r"\\.\pipe\docker_engine"))
+}
+
+/// Открывает соединение с демоном по его адресу. `Err` — подключиться не
+/// удалось (Docker не запущен): фича молча деградирует в «контейнеров нет».
+#[cfg(unix)]
+fn connect(endpoint: &Path) -> Result<std::os::unix::net::UnixStream, String> {
+    let stream = std::os::unix::net::UnixStream::connect(endpoint).map_err(|e| e.to_string())?;
+    stream.set_read_timeout(Some(IO_TIMEOUT)).ok();
+    stream.set_write_timeout(Some(IO_TIMEOUT)).ok();
+    Ok(stream)
+}
+
+/// Windows: named pipe открывается как обычный файл в блокирующем режиме.
+/// Таймаута нет (у `File` его не выставить), но `read_to_end` завершается по
+/// закрытию пайпа сервером (`Connection: close`), а недоступный демон отвалится
+/// уже на `open`.
+#[cfg(windows)]
+fn connect(endpoint: &Path) -> Result<std::fs::File, String> {
+    std::fs::OpenOptions::new()
+        .read(true)
+        .write(true)
+        .open(endpoint)
+        .map_err(|e| e.to_string())
+}
+
 /// Выполняет один HTTP/1.1-запрос к демону и возвращает `(код статуса, тело)`.
 ///
 /// Версия API в пути не указывается — демон берёт максимально поддерживаемую
 /// (совместимо с Docker Desktop / OrbStack / Colima / Podman). `Connection:
 /// close` заставляет сервер закрыть соединение после ответа — читаем до EOF.
 fn request(method: &str, path: &str) -> Result<(u16, Vec<u8>), String> {
-    let socket = docker_socket().ok_or("Docker-сокет не найден")?;
-    let mut stream = UnixStream::connect(&socket).map_err(|e| e.to_string())?;
-    stream.set_read_timeout(Some(IO_TIMEOUT)).ok();
-    stream.set_write_timeout(Some(IO_TIMEOUT)).ok();
+    let endpoint = docker_endpoint().ok_or("Docker-сокет не найден")?;
+    let mut stream = connect(&endpoint)?;
 
     let req = format!(
         "{method} {path} HTTP/1.1\r\nHost: docker\r\nAccept: application/json\r\nConnection: close\r\n\r\n"
@@ -225,7 +265,7 @@ fn parse_containers(body: &[u8]) -> Result<Vec<ContainerInfo>, String> {
 /// Docker не найден — не ошибка: контейнеров просто нет.
 #[tauri::command]
 pub fn list_containers() -> Result<Vec<ContainerInfo>, String> {
-    if docker_socket().is_none() {
+    if docker_endpoint().is_none() {
         return Ok(Vec::new());
     }
     let (status, body) = request("GET", "/containers/json")?;
@@ -255,5 +295,96 @@ pub fn stop_container(id: String) -> Result<(), String> {
         204 | 304 => Ok(()),
         404 => Err("Контейнер не найден".into()),
         _ => Err(format!("Docker вернул статус {status}")),
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn parse_response_reads_status_and_plain_body() {
+        let raw = b"HTTP/1.1 200 OK\r\nContent-Type: application/json\r\n\r\n[]";
+        let (status, body) = parse_response(raw).unwrap();
+        assert_eq!(status, 200);
+        assert_eq!(body, b"[]");
+    }
+
+    #[test]
+    fn parse_response_dechunks_chunked_body() {
+        // "hi" + "!" двумя чанками.
+        let raw =
+            b"HTTP/1.1 200 OK\r\nTransfer-Encoding: chunked\r\n\r\n2\r\nhi\r\n1\r\n!\r\n0\r\n\r\n";
+        let (status, body) = parse_response(raw).unwrap();
+        assert_eq!(status, 200);
+        assert_eq!(body, b"hi!");
+    }
+
+    #[test]
+    fn parse_response_errors_without_header_terminator() {
+        assert!(parse_response(b"not an http response").is_err());
+    }
+
+    #[test]
+    fn dechunk_handles_size_extensions() {
+        // Размер чанка может нести расширение после ';'.
+        let body = b"3;foo=bar\r\nabc\r\n0\r\n\r\n";
+        assert_eq!(dechunk(body).unwrap(), b"abc");
+    }
+
+    #[test]
+    fn dechunk_errors_on_incomplete_chunk() {
+        // Заявлено 5 байт, а есть только 2.
+        assert!(dechunk(b"5\r\nab\r\n").is_err());
+    }
+
+    #[test]
+    fn parse_containers_maps_names_ports_and_labels() {
+        let body = br#"[
+          {
+            "Id": "abc123",
+            "Names": ["/web"],
+            "Image": "nginx:latest",
+            "Ports": [
+              {"PublicPort": 8080, "Type": "tcp"},
+              {"Type": "udp"}
+            ],
+            "Labels": {
+              "com.docker.compose.project": "shop",
+              "com.docker.compose.service": "web"
+            }
+          }
+        ]"#;
+        let containers = parse_containers(body).unwrap();
+        assert_eq!(containers.len(), 1);
+        let c = &containers[0];
+        assert_eq!(c.id, "abc123");
+        assert_eq!(c.name, "web"); // ведущий '/' убран
+        assert_eq!(c.image, "nginx:latest");
+        assert_eq!(c.compose_project.as_deref(), Some("shop"));
+        assert_eq!(c.compose_service.as_deref(), Some("web"));
+        assert_eq!(c.ports.len(), 2);
+        assert_eq!(c.ports[0].public_port, Some(8080));
+        assert_eq!(c.ports[0].protocol, "tcp");
+        assert_eq!(c.ports[1].public_port, None);
+        assert_eq!(c.ports[1].protocol, "udp");
+    }
+
+    #[test]
+    fn parse_containers_defaults_missing_fields() {
+        let containers = parse_containers(br#"[{}]"#).unwrap();
+        assert_eq!(containers.len(), 1);
+        let c = &containers[0];
+        assert_eq!(c.name, "");
+        assert_eq!(c.image, "");
+        assert!(c.compose_project.is_none());
+        assert!(c.ports.is_empty());
+    }
+
+    #[test]
+    fn label_reads_nested_string_or_none() {
+        let v: Value = serde_json::from_str(r#"{"Labels":{"k":"v"}}"#).unwrap();
+        assert_eq!(label(&v, "k").as_deref(), Some("v"));
+        assert_eq!(label(&v, "missing"), None);
     }
 }

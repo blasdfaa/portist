@@ -1,39 +1,40 @@
-import { Injectable, effect, signal } from "@angular/core";
+import { Injectable, effect } from "@angular/core";
+
+import { type Codec, persistedSignal } from "../core/persisted-signal";
 
 export type ThemeMode = "auto" | "light" | "dark";
 
 const STORAGE_KEY = "portist.theme";
 const MODES: ThemeMode[] = ["auto", "light", "dark"];
 
+/** Кодек режима темы: валидный из списка либо дефолт «auto». */
+export const themeCodec: Codec<ThemeMode> = {
+  parse: (raw) =>
+    raw !== null && MODES.includes(raw as ThemeMode) ? (raw as ThemeMode) : "auto",
+  serialize: (mode) => mode,
+};
+
 /**
- * Выбор темы оформления. Режим хранится в localStorage и проставляется
- * атрибутом `data-theme` на <html>; «auto» решается на стороне CSS через
- * `@media (prefers-color-scheme)`, поэтому смена системной темы подхватывается
- * живьём без слушателей в коде.
+ * Выбор темы оформления. Режим персистится через {@link persistedSignal} и
+ * проставляется атрибутом `data-theme` на <html>; «auto» решается на стороне CSS
+ * через `@media (prefers-color-scheme)`, поэтому смена системной темы
+ * подхватывается живьём без слушателей в коде.
  */
 @Injectable({ providedIn: "root" })
 export class ThemeService {
-  private readonly _mode = signal<ThemeMode>(this.read());
+  private readonly _mode = persistedSignal(STORAGE_KEY, themeCodec);
   /** Текущий режим темы для UI настроек. */
   readonly mode = this._mode.asReadonly();
 
   constructor() {
-    // Единственный side-effect: атрибут на <html> + запоминание выбора.
+    // DOM-side-effect (не персист — тот в persistedSignal): атрибут на <html>.
     effect(() => {
-      const mode = this._mode();
-      document.documentElement.setAttribute("data-theme", mode);
-      localStorage.setItem(STORAGE_KEY, mode);
+      document.documentElement.setAttribute("data-theme", this._mode());
     });
   }
 
   /** Переключить тему. */
   setMode(mode: ThemeMode): void {
     this._mode.set(mode);
-  }
-
-  /** Прочитать сохранённый режим; дефолт — «авто» (по системе). */
-  private read(): ThemeMode {
-    const saved = localStorage.getItem(STORAGE_KEY) as ThemeMode | null;
-    return saved && MODES.includes(saved) ? saved : "auto";
   }
 }
