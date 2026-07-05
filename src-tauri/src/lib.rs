@@ -40,6 +40,11 @@ fn show_popover(app: &tauri::AppHandle) {
             let _ = window.move_window(Position::BottomRight);
         }
         let _ = window.show();
+        // Windows 10 навешивает дефолтную тень окна при показе — halo вокруг
+        // окна, просвечивает серым. Чистим после каждого show (tauri#11321).
+        // macOS тень сохраняет.
+        #[cfg(target_os = "windows")]
+        let _ = window.set_shadow(false);
         let _ = window.set_focus();
         let _ = window.emit("popover-shown", ());
     }

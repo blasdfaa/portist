@@ -80,6 +80,15 @@ app-root {
   height: 100%;
 }
 
+/* Windows: серые углы = box-shadow у .shell бликует в прозрачных углах WebView2
+   (тень внутри вебвью, подтверждено red-тестом). .shell стилизуется в app.css
+   (скоуп-стили Angular), поэтому глушим тень отсюда, из глобального файла, с
+   !important. Нативная тень окна снята в рантайме (lib.rs, tauri#11321).
+   Углы остаются прозрачными → чистое скругление. Тень остаётся на macOS. */
+:root[data-os="windows"] .shell {
+  box-shadow: none !important;
+}
+
 button {
   font-family: var(--font-mono);
 }

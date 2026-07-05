@@ -12,6 +12,12 @@
           "data-theme",
           localStorage.getItem("portist.theme") || "auto",
         );
+        // На Windows тень .shell бликует серым в прозрачных углах WebView2 —
+        // помечаем ОС, чтобы глобальный CSS её убрал (см. styles.css
+        // [data-os="windows"]). Ставим до Angular, как и data-theme.
+        if (navigator.userAgent.includes("Windows")) {
+          document.documentElement.setAttribute("data-os", "windows");
+        }
       } catch (e) {}
     </script>
   </head>
